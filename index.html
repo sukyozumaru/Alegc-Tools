@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<!--
+  Alegc Tools — panel personal
+  Las secciones que usan IA (Mi potencial, Ideas de contenido, IA, Aprendizaje/YouTube)
+  dependen de `window.claude.use(...)`, una función que solo existe dentro del
+  entorno de artefactos de Claude. Fuera de ahí (ej. GitHub Pages) esas secciones
+  se degradan a un mensaje "no disponible" en vez de fallar — el resto del sitio
+  (Instagram, diseño, guardado local) funciona igual. Ver README.md.
+-->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Alegc Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16261E;
+    --ink-soft: #24382C;
+    --cream: #F3EFE6;
+    --callout-bg: #F3EFE6;
+    --paper: #F6F4EE;
+    --paper-card: #FFFFFF;
+    --line: #E4DFD2;
+    --gold: #B8912E;
+    --gold-soft: #E9DDB8;
+    --clay: #A9532F;
+    --text: #221E17;
+    --text-soft: #6B655A;
+    --danger: #A13A2C;
+    --clay-soft: #EFD9CE;
+    --radius-lg: 18px;
+    --radius-sm: 10px;
+  }
+  /* Note: --cream stays constant — it's the sidebar's text color, and the
+     sidebar background (--ink) never changes. Alegc Tools always renders in
+     its designed light palette; it does not auto-switch based on the
+     visitor's OS/browser dark-mode setting, only via an explicit data-theme
+     attribute (unused for now). */
+  :root[data-theme="dark"] {
+    --paper: #171613;
+    --paper-card: #201E1A;
+    --line: #33302A;
+    --text: #EDE8DD;
+    --text-soft: #A79E8D;
+    --callout-bg: #2A2620;
+    --clay-soft: #3A2A22;
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  :root[data-theme="dark"] h1, :root[data-theme="dark"] h2, :root[data-theme="dark"] h3, :root[data-theme="dark"] .display {
+    color: var(--text);
+  }
+
+  .app { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 252px;
+    flex-shrink: 0;
+    background: var(--ink);
+    color: var(--cream);
+    padding: 28px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 8px;
+  }
+  .brand .mark {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--cream);
+    font-weight: 500;
+  }
+  .brand .mark em { color: var(--gold-soft); font-style: normal; }
+  .brand .sub { font-size: 12.5px; color: #9FAE9F; }
+
+  .nav-group { display: flex; flex-direction: column; gap: 4px; }
+  .nav-label {
+    font-size: 12px;
+    color: #8DA08D;
+    padding: 6px 10px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    color: #D7DECB;
+    cursor: pointer;
+    font-size: 14.5px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); }
+  .nav-item.active {
+    background: rgba(233, 221, 184, 0.14);
+    color: var(--gold-soft);
+  }
+  .nav-sub { padding-left: 26px; display: flex; flex-direction: column; gap: 2px; margin-top: 2px;}
+  .nav-item.disabled {
+    color: #5C6B5C;
+    cursor: default;
+  }
+  .nav-item.disabled:hover { background: none; }
+  .soon-tag {
+    margin-left: auto;
+    font-size: 10.5px;
+    color: #6C7C6C;
+    border: 1px solid #3A4A3A;
+    padding: 1px 6px;
+    border-radius: 20px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink:0;}
+
+  .sidebar-foot {
+    margin-top: auto;
+    font-size: 12px;
+    color: #6C7C6C;
+    padding: 0 8px;
+  }
+
+  /* Main */
+  .main { flex: 1; min-width: 0; padding: 34px 44px 60px; overflow-x: hidden; }
+  .crumb { font-size: 13px; color: var(--text-soft); margin-bottom: 6px; }
+  .crumb b { color: var(--text); font-weight: 600; }
+  .page-title { font-size: 30px; margin: 0 0 6px; }
+  .page-desc { color: var(--text-soft); max-width: 62ch; margin: 0 0 26px; }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 26px; flex-wrap: wrap; }
+  .tab, .seg-tab {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--text-soft);
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+    position: relative;
+    top: 1px;
+  }
+  .tab.active, .seg-tab.active {
+    color: var(--ink);
+    font-weight: 600;
+    border-bottom: 2px solid var(--gold);
+  }
+  :root[data-theme="dark"] .tab.active, :root[data-theme="dark"] .seg-tab.active { color: var(--text); }
+
+  .panel, .seg-panel { display: none; }
+  .panel.active, .seg-panel.active { display: block; }
+
+  .grid { display: grid; gap: 16px; }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 900px) {
+    .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; }
+    .sidebar { width: 210px; }
+    .main { padding: 24px; }
+  }
+
+  .card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+  }
+  .card h3 { font-size: 16px; margin: 0 0 4px; }
+  .stat-num { font-size: 34px; font-family: 'Fraunces', serif; color: var(--ink); }
+  :root[data-theme="dark"] .stat-num { color: var(--text); }
+  .stat-label { font-size: 13px; color: var(--text-soft); margin-top: 2px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 13px; color: var(--text-soft); }
+  .field input, .field select, .field textarea {
+    font-family: inherit;
+    font-size: 14.5px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+    color: var(--text);
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ink); color: var(--cream);
+    border: none; padding: 11px 18px;
+    border-radius: 999px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+  }
+  .btn:hover { background: var(--ink-soft); }
+  .btn.secondary {
+    background: transparent; color: var(--ink); border: 1px solid var(--line);
+  }
+  :root[data-theme="dark"] .btn.secondary { color: var(--text); }
+  .btn.secondary:hover { background: rgba(0,0,0,0.04); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.small { padding: 7px 14px; font-size: 13px; }
+
+  .callout {
+    background: var(--callout-bg);
+    border: 1px solid var(--gold-soft);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    font-size: 13.8px;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+    display: flex; gap: 12px;
+  }
+  :root[data-theme="dark"] .callout { color: var(--text); }
+  .callout .icon { font-size: 18px; }
+
+  .upload-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+  .upload-box {
+    flex: 1; min-width: 220px;
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .upload-box:hover { border-color: var(--gold); }
+  .upload-box input { display: none; }
+  .upload-box .fn { font-size: 12.5px; color: var(--text-soft); margin-top: 6px; word-break: break-all; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12.5px; color: var(--text-soft); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: none; }
+  .username-link { color: var(--ink); text-decoration: none; font-weight: 500; }
+  :root[data-theme="dark"] .username-link { color: var(--text); }
+  .username-link:hover { text-decoration: underline; }
+
+  .table-wrap { max-height: 420px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .table-wrap table { min-width: 420px; }
+
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .toolbar .count { font-size: 13px; color: var(--text-soft); margin-right: auto; }
+
+  .trend-card { border-left: 3px solid var(--gold); padding-left: 16px; margin-bottom: 20px; }
+  .trend-card h3 { margin-bottom: 6px; }
+  .trend-card p { color: var(--text-soft); margin: 0; font-size: 14px; max-width: 68ch; }
+
+  .ai-output {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    margin-top: 18px;
+    white-space: pre-wrap;
+    font-size: 14.5px;
+    line-height: 1.65;
+    min-height: 60px;
+  }
+  .ai-output.empty { color: var(--text-soft); font-style: italic; }
+  .loading-dots::after {
+    content: '...';
+    animation: dots 1.2s steps(4, end) infinite;
+  }
+  @keyframes dots { 0%,20%{content:'.';} 40%{content:'..';} 60%,100%{content:'...';} }
+
+  .badge { display:inline-block; font-size: 11px; padding: 2px 9px; border-radius: 999px; background: var(--gold-soft); color: var(--ink); margin-left: 8px; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+
+  /* Views (top-level pages) */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Idea cards (Productividad > IA) */
+  .category-heading {
+    font-size: 13.5px;
+    color: var(--text-soft);
+    margin: 26px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .category-heading:first-child { margin-top: 0; }
+  .idea-card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px 12px;
+    margin-bottom: 12px;
+  }
+  .idea-card.type-existente { border-left-color: var(--gold); }
+  .idea-card.type-original { border-left-color: var(--clay); }
+  .idea-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+  .idea-top h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 16px; font-weight: 500;
+    margin: 0 0 5px; color: var(--ink);
+  }
+  :root[data-theme="dark"] .idea-top h4 { color: var(--text); }
+  .idea-desc { color: var(--text-soft); font-size: 13.8px; margin: 0; max-width: 60ch; }
+  .idea-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .icon-btn {
+    border: 1px solid var(--line); background: var(--paper);
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 13px; padding: 0;
+    color: var(--text);
+  }
+  .icon-btn:hover { border-color: var(--gold); }
+  .icon-btn.is-flagged { background: var(--gold-soft); border-color: var(--gold); }
+  .idea-meta { margin-top: 8px; font-size: 11px; color: var(--text-soft); text-align: right; opacity: 0.8; }
+  .saved-item {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; padding: 10px 0 10px 12px; border-bottom: 1px solid var(--line);
+  }
+  .saved-item:last-child { border-bottom: none; }
+  .saved-item[data-type="existente"] { border-left: 3px solid var(--gold); }
+  .saved-item[data-type="original"] { border-left: 3px solid var(--clay); }
+  .saved-item h4 { font-size: 14.5px; margin: 0 0 3px; font-family: 'Fraunces', serif; color: var(--ink); font-weight: 500; }
+  :root[data-theme="dark"] .saved-item h4 { color: var(--text); }
+  .saved-item p { margin: 0; font-size: 13px; color: var(--text-soft); max-width: 58ch; }
+  .empty-note { color: var(--text-soft); font-size: 13.5px; padding: 6px 0; }
+  .tag-existente { display:inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 999px; background: var(--gold-soft); color: #6B531A; margin-right: 6px; margin-bottom: 6px; }
+  .tag-original { display:inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 999px; background: var(--clay-soft); color: var(--clay); margin-right: 6px; margin-bottom: 6px; }
+
+  /* Aprendizaje > YouTube */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .video-card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .video-thumb { width: 100%; aspect-ratio: 16/9; display: block; line-height: 0; background: var(--line); }
+  .video-thumb svg { width: 100%; height: 100%; display: block; }
+  .video-body { padding: 14px 16px 4px; flex: 1; }
+  .video-body h4 { font-family: 'Fraunces', serif; font-size: 15.5px; font-weight: 500; margin: 8px 0 6px; line-height: 1.3; color: var(--ink); }
+  :root[data-theme="dark"] .video-body h4 { color: var(--text); }
+  .video-reason { color: var(--text-soft); font-size: 13px; margin: 0; line-height: 1.5; }
+  .video-actions-row { display: flex; align-items: center; gap: 8px; padding: 12px 16px 6px; }
+  .video-actions-row .btn { padding: 7px 14px; font-size: 12.5px; }
+  .icon-group { margin-left: auto; display: flex; gap: 6px; }
+  .video-meta { padding: 0 16px 14px; font-size: 10.5px; color: var(--text-soft); opacity: 0.8; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">Alegc <em>Tools</em></div>
+      <div class="sub">panel personal · Gabo</div>
+    </div>
+
+    <nav class="nav-group">
+      <div class="nav-label">Red social</div>
+      <button class="nav-item active" data-view="instagram">
+        <span class="dot"></span> Instagram
+      </button>
+    </nav>
+
+    <nav class="nav-group">
+      <div class="nav-label">Productividad</div>
+      <button class="nav-item" data-view="ia">
+        <span class="dot"></span> IA
+      </button>
+    </nav>
+
+    <nav class="nav-group">
+      <div class="nav-label">Aprendizaje</div>
+      <button class="nav-item" data-view="aprendizaje">
+        <span class="dot"></span> YouTube
+      </button>
+    </nav>
+
+    <nav class="nav-group">
+      <div class="nav-label">Próximamente</div>
+      <button class="nav-item disabled" disabled><span class="dot"></span> Noticias <span class="soon-tag">pronto</span></button>
+      <button class="nav-item disabled" disabled><span class="dot"></span> Finanzas <span class="soon-tag">pronto</span></button>
+      <button class="nav-item disabled" disabled><span class="dot"></span> Cocina &amp; recetas <span class="soon-tag">pronto</span></button>
+    </nav>
+
+    <div class="sidebar-foot">Tus datos se procesan en tu navegador. Nada se sube a Instagram ni se comparte.</div>
+  </aside>
+
+  <main class="main">
+    <div class="view active" id="view-instagram">
+      <div class="crumb">Red social &nbsp;/&nbsp; <b>Instagram</b></div>
+      <h1 class="page-title">Instagram</h1>
+      <p class="page-desc">Analiza tu cuenta con tus propios datos exportados, revisa a quién dejar de seguir manualmente, y usa IA para entender tu potencial de perfil y qué contenido publicar.</p>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="resumen">Resumen</button>
+        <button class="tab" data-tab="seguidores">Seguidores</button>
+        <button class="tab" data-tab="tendencias">Tendencias</button>
+        <button class="tab" data-tab="potencial">Mi potencial</button>
+        <button class="tab" data-tab="contenido">Ideas de contenido</button>
+      </div>
+
+      <!-- RESUMEN -->
+      <section class="panel active" id="panel-resumen">
+        <div class="grid cols-3" style="margin-bottom:20px;">
+          <div class="card">
+            <div class="stat-num" id="stat-followers">—</div>
+            <div class="stat-label">Seguidores</div>
+          </div>
+          <div class="card">
+            <div class="stat-num" id="stat-following">—</div>
+            <div class="stat-label">Siguiendo</div>
+          </div>
+          <div class="card">
+            <div class="stat-num" id="stat-notback">—</div>
+            <div class="stat-label">No te siguen de vuelta</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Actualiza tus números</h3>
+          <p style="color:var(--text-soft); font-size:13.5px; margin-top:2px;">Escribe tus cifras actuales de Instagram, o ve a la pestaña Seguidores y sube tu archivo para que se calculen solas.</p>
+          <div class="grid cols-2" style="margin-top:14px;">
+            <div class="field">
+              <label>Seguidores</label>
+              <input type="number" id="input-followers" placeholder="ej. 1240">
+            </div>
+            <div class="field">
+              <label>Siguiendo</label>
+              <input type="number" id="input-following" placeholder="ej. 980">
+            </div>
+          </div>
+          <button class="btn" id="save-stats">Guardar</button>
+        </div>
+      </section>
+
+      <!-- SEGUIDORES -->
+      <section class="panel" id="panel-seguidores">
+        <div class="callout">
+          <span class="icon">🛈</span>
+          <div>
+            <b>Por qué no hay login ni bot automático:</b> Instagram prohíbe en sus Términos de Servicio cualquier automatización de follow/unfollow, y suspende cuentas que lo intentan — no hay forma segura de hacerlo. En cambio, usamos el archivo que Instagram te deja descargar de ti mismo: <b>Configuración → Tu actividad → Descargar tu información → formato JSON → Conexiones (Seguidores y Seguidos)</b>. Todo el cálculo pasa aquí, en tu navegador.
+          </div>
+        </div>
+
+        <div class="upload-row">
+          <label class="upload-box">
+            <input type="file" id="file-followers" accept=".json">
+            <div>📥 Subir <b>followers_1.json</b></div>
+            <div class="fn" id="fn-followers">Ningún archivo cargado</div>
+          </label>
+          <label class="upload-box">
+            <input type="file" id="file-following" accept=".json">
+            <div>📤 Subir <b>following.json</b></div>
+            <div class="fn" id="fn-following">Ningún archivo cargado</div>
+          </label>
+        </div>
+
+        <div class="toolbar">
+          <span class="count" id="notback-count">Sube ambos archivos para ver tu lista</span>
+          <button class="btn small secondary" id="select-all">Seleccionar todo</button>
+          <button class="btn small secondary" id="export-csv">Exportar seleccionados (CSV)</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:34px;"></th><th>Cuenta</th><th>Revisado</th></tr></thead>
+            <tbody id="notback-body">
+              <tr><td colspan="3" style="color:var(--text-soft); text-align:center; padding:30px;">Aún no hay datos cargados.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TENDENCIAS -->
+      <section class="panel" id="panel-tendencias">
+        <p style="color:var(--text-soft); font-size:13px; margin-top:-10px; margin-bottom:22px;">Panorama de septiembre 2026 — se actualizará conforme cambien las tendencias.</p>
+
+        <div class="trend-card">
+          <h3>Lo que se comparte por DM gana más que lo que se pone "like"</h3>
+          <p>Las publicaciones que la gente reenvía a un amigo o colega por ser útiles o específicas están rindiendo mejor que el contenido pulido de marca. Antes de publicar, pregúntate: ¿esto es algo que alguien le mandaría a otra persona?</p>
+        </div>
+        <div class="trend-card">
+          <h3>Lo casero le está ganando a lo producido</h3>
+          <p>Reels grabados en una toma, hablando a cámara, mostrando trabajo real, generan más confianza que el video con mucha edición. No necesitas equipo caro para que funcione.</p>
+        </div>
+        <div class="trend-card">
+          <h3>Cada formato cumple un trabajo distinto</h3>
+          <p>Reels traen alcance nuevo, los carruseles construyen confianza y se guardan, las Historias generan respuestas directas. Usarlos todos, con un propósito distinto cada uno, rinde más que enfocarse solo en Reels.</p>
+        </div>
+        <div class="trend-card">
+          <h3>Publicar más no es lo mismo que crecer más</h3>
+          <p>El volumen de contenido subió en toda la plataforma, pero el alcance por publicación bajó. Lo que sí sube son las vistas totales y las interacciones cuando el contenido logra que te quedes viéndolo o lo vuelvan a ver — la calidad de retención importa más que la frecuencia.</p>
+        </div>
+        <div class="trend-card">
+          <h3>Instagram sigue siendo el lugar de compra favorito</h3>
+          <p>Para negocios y creadores con producto, Instagram es la plataforma donde más gente en EE.UU. prefiere comprar directamente, por delante de TikTok. Si vendes algo (comida, servicios), vale la pena facilitar el camino a la compra desde el perfil.</p>
+        </div>
+      </section>
+
+      <!-- POTENCIAL -->
+      <section class="panel" id="panel-potencial">
+        <div class="card">
+          <h3>Cuéntame de tu perfil</h3>
+          <div class="grid cols-2" style="margin-top:14px;">
+            <div class="field">
+              <label>Tu nicho o tema principal</label>
+              <input type="text" id="pot-niche" placeholder="ej. cocina y pizzería, mundo culinario">
+            </div>
+            <div class="field">
+              <label>Con qué frecuencia publicas</label>
+              <select id="pot-freq">
+                <option value="casi nunca">Casi nunca</option>
+                <option value="1 vez por semana">1 vez por semana</option>
+                <option value="2-3 veces por semana" selected>2-3 veces por semana</option>
+                <option value="casi diario">Casi diario</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>¿Qué quieres lograr con tu Instagram?</label>
+            <textarea id="pot-goal" placeholder="ej. mostrar mi camino como cocinero, conseguir más clientes, crecer una marca personal en gastronomía..."></textarea>
+          </div>
+          <button class="btn" id="run-potencial">Analizar mi potencial</button>
+        </div>
+        <div class="ai-output empty" id="out-potencial">Completa el formulario y presiona "Analizar mi potencial" para ver un diagnóstico hecho para tu perfil.</div>
+      </section>
+
+      <!-- CONTENIDO -->
+      <section class="panel" id="panel-contenido">
+        <div class="card">
+          <h3>Ideas de contenido para ti</h3>
+          <p style="color:var(--text-soft); font-size:13.5px; margin-top:2px;">Usa la misma info de la pestaña "Mi potencial", o ajústala aquí.</p>
+          <div class="field" style="margin-top:14px;">
+            <label>Tema o nicho</label>
+            <input type="text" id="cont-niche" placeholder="ej. cocina y pizzería, mundo culinario">
+          </div>
+          <div class="field">
+            <label>Algo que te distingue (opcional)</label>
+            <input type="text" id="cont-diff" placeholder="ej. trabajo en cocina de pizzería, quiero mostrar mi camino aprendiendo el oficio">
+          </div>
+          <button class="btn" id="run-contenido">Generar ideas de contenido</button>
+        </div>
+        <div class="ai-output empty" id="out-contenido">Presiona "Generar ideas de contenido" para recibir una lista pensada para tu nicho.</div>
+      </section>
+    </div>
+
+    <div class="view" id="view-ia">
+      <div class="crumb">Productividad &nbsp;/&nbsp; <b>IA</b></div>
+      <h1 class="page-title">IA</h1>
+      <p class="page-desc">Ideas para probar hoy, separadas en dos mundos: lo que ya existe y puedes usar ahora, y lo que aún no existe y podríamos construir juntos desde cero.</p>
+
+      <div class="tabs" id="ia-tabs">
+        <button class="seg-tab active" data-iatab="existentes">Herramientas que ya existen</button>
+        <button class="seg-tab" data-iatab="originales">Crear desde cero</button>
+        <button class="seg-tab" data-iatab="guardadas">Más tarde <span class="badge" id="saved-count-badge">0</span></button>
+      </div>
+
+      <div class="toolbar" id="ia-ideas-toolbar">
+        <span class="count" id="ia-meta">—</span>
+        <button class="btn small secondary" id="ia-reset">↻ Reiniciar ideas</button>
+      </div>
+
+      <section class="seg-panel active" id="iapanel-existentes">
+        <p class="page-desc" style="margin-top:-6px; font-size:13.5px;">Cosas que puedes abrir y probar ahora mismo: apps, páginas y herramientas de IA que ya están disponibles.</p>
+        <div id="ia-groups-existentes"><p class="empty-note">Cargando ideas…</p></div>
+      </section>
+
+      <section class="seg-panel" id="iapanel-originales">
+        <p class="page-desc" style="margin-top:-6px; font-size:13.5px;">Conceptos que todavía no existen tal cual — cosas que podríamos diseñar y construir juntos desde cero.</p>
+        <div id="ia-groups-originales"><p class="empty-note">Cargando ideas…</p></div>
+      </section>
+
+      <section class="seg-panel" id="iapanel-guardadas">
+        <p class="page-desc" style="margin-top:-6px; font-size:13.5px;">Ideas que marcaste con la bandera para retomar más adelante. Reiniciar ideas nunca toca esta lista.</p>
+        <div id="ia-saved-list"><p class="empty-note">Aún no has guardado ninguna idea.</p></div>
+      </section>
+    </div>
+
+    <div class="view" id="view-aprendizaje">
+      <div class="crumb">Aprendizaje &nbsp;/&nbsp; <b>YouTube</b></div>
+      <h1 class="page-title">YouTube</h1>
+      <p class="page-desc">Un feed de recomendaciones para ver mientras comes o descansas: teorías, historias, tutoriales y reflexiones sobre IA, cine, psicología, videojuegos y relaciones modernas. Nada de noticias por ahora — eso vendrá en su propia sección.</p>
+
+      <div class="tabs" id="ap-tabs">
+        <button class="seg-tab active" data-aptab="recomendados">Recomendados</button>
+        <button class="seg-tab" data-aptab="guardados">Más tarde <span class="badge" id="ap-saved-count">0</span></button>
+      </div>
+
+      <div class="toolbar" id="ap-toolbar">
+        <span class="count" id="ap-meta">—</span>
+        <button class="btn small secondary" id="ap-refresh">🔄 Nuevas recomendaciones</button>
+      </div>
+
+      <section class="seg-panel active" id="appanel-recomendados">
+        <div class="video-grid" id="ap-grid"><p class="empty-note">Buscando algo bueno para hoy…</p></div>
+      </section>
+
+      <section class="seg-panel" id="appanel-guardados">
+        <div class="video-grid" id="ap-saved-grid"><p class="empty-note">Aún no has guardado ningún video.</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  // ---------- Top-level nav (sidebar views) ----------
+  document.querySelectorAll('.nav-item[data-view]').forEach(function(item){
+    item.addEventListener('click', function(){
+      document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById('view-' + item.dataset.view).classList.add('active');
+      if (item.dataset.view === 'ia') initIA();
+      if (item.dataset.view === 'aprendizaje') initAprendizaje();
+    });
+  });
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- Capabilities ----------
+  let db = null, sampler = null, downloads = null;
+  async function initCapabilities(){
+    try {
+      if (window.claude && window.claude.use) {
+        db = await window.claude.use('db').catch(()=>null);
+        sampler = await window.claude.use('sample').catch(()=>null);
+        downloads = await window.claude.use('downloads').catch(()=>null);
+      }
+    } catch(e) { /* no runtime available, degrade to localStorage only */ }
+    loadState();
+  }
+
+  // ---------- State (db with localStorage fallback) ----------
+  const LS_KEY = 'alegc_instagram_state_v1';
+  let state = { followers: null, following: 0, notFollowingBack: [], reviewed: {}, profile: {} };
+
+  function localSave(){
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+  }
+  function localLoad(){
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) state = Object.assign(state, JSON.parse(raw));
+    } catch(e){}
+  }
+
+  async function loadState(){
+    localLoad();
+    if (db) {
+      try {
+        const doc = await db.doc('alegc/instagram').get();
+        if (doc && doc.exists) state = Object.assign(state, doc.data());
+      } catch(e){}
+    }
+    renderStats();
+    renderNotBackTable();
+  }
+
+  async function saveState(){
+    localSave();
+    if (db) {
+      try { await db.doc('alegc/instagram').set(state); } catch(e){}
+    }
+  }
+
+  // ---------- Resumen tab ----------
+  document.getElementById('save-stats').addEventListener('click', function(){
+    const f = parseInt(document.getElementById('input-followers').value, 10);
+    const g = parseInt(document.getElementById('input-following').value, 10);
+    if (!isNaN(f)) state.followers = f;
+    if (!isNaN(g)) state.following = g;
+    saveState();
+    renderStats();
+  });
+
+  function renderStats(){
+    document.getElementById('stat-followers').textContent = state.followers != null ? state.followers.toLocaleString('es') : '—';
+    document.getElementById('stat-following').textContent = state.following != null ? state.following.toLocaleString('es') : '—';
+    document.getElementById('stat-notback').textContent = (state.notFollowingBack && state.notFollowingBack.length) ? state.notFollowingBack.length.toLocaleString('es') : '—';
+    if (state.followers != null) document.getElementById('input-followers').value = state.followers;
+    if (state.following != null) document.getElementById('input-following').value = state.following;
+  }
+
+  // ---------- Seguidores: parsing Instagram export ----------
+  let followersSet = null, followingSet = null;
+
+  function extractUsernames(json){
+    // Instagram export formats vary; recursively find every string_list_data[].value
+    const out = new Set();
+    function walk(node){
+      if (!node) return;
+      if (Array.isArray(node)) { node.forEach(walk); return; }
+      if (typeof node === 'object') {
+        if (Array.isArray(node.string_list_data)) {
+          node.string_list_data.forEach(function(item){
+            if (item && item.value) out.add(item.value);
+          });
+        }
+        Object.values(node).forEach(walk);
+      }
+    }
+    walk(json);
+    return out;
+  }
+
+  function handleFile(inputEl, fnEl, onParsed){
+    inputEl.addEventListener('change', function(){
+      const file = inputEl.files[0];
+      if (!file) return;
+      fnEl.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = function(e){
+        try {
+          const json = JSON.parse(e.target.result);
+          const usernames = extractUsernames(json);
+          onParsed(usernames);
+        } catch(err){
+          fnEl.textContent = file.name + ' — no se pudo leer el JSON';
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  function computeNotBack(){
+    if (!followersSet || !followingSet) return;
+    const notBack = [];
+    followingSet.forEach(function(u){ if (!followersSet.has(u)) notBack.push(u); });
+    notBack.sort((a,b)=>a.localeCompare(b));
+    state.notFollowingBack = notBack;
+    state.followers = followersSet.size;
+    state.following = followingSet.size;
+    saveState();
+    renderStats();
+    renderNotBackTable();
+  }
+
+  handleFile(document.getElementById('file-followers'), document.getElementById('fn-followers'), function(set){
+    followersSet = set; computeNotBack();
+  });
+  handleFile(document.getElementById('file-following'), document.getElementById('fn-following'), function(set){
+    followingSet = set; computeNotBack();
+  });
+
+  function renderNotBackTable(){
+    const body = document.getElementById('notback-body');
+    const list = state.notFollowingBack || [];
+    const countEl = document.getElementById('notback-count');
+    if (!list.length) {
+      body.innerHTML = '<tr><td colspan="3" style="color:var(--text-soft); text-align:center; padding:30px;">Sube ambos archivos para calcular tu lista.</td></tr>';
+      countEl.textContent = 'Sube ambos archivos para ver tu lista';
+      return;
+    }
+    countEl.textContent = list.length + ' cuentas no te siguen de vuelta';
+    body.innerHTML = list.map(function(u){
+      const checked = state.reviewed[u] ? 'checked' : '';
+      const safeU = escapeHtml(u);
+      return '<tr>' +
+        '<td><input type="checkbox" class="pick-row" data-u="' + safeU + '"></td>' +
+        '<td><a class="username-link" href="https://instagram.com/' + encodeURIComponent(u) + '" target="_blank" rel="noopener">@' + safeU + '</a></td>' +
+        '<td><input type="checkbox" class="mark-reviewed" data-u="' + safeU + '" ' + checked + '></td>' +
+        '</tr>';
+    }).join('');
+    body.querySelectorAll('.mark-reviewed').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        state.reviewed[cb.dataset.u] = cb.checked;
+        saveState();
+      });
+    });
+  }
+
+  document.getElementById('select-all').addEventListener('click', function(){
+    document.querySelectorAll('.pick-row').forEach(function(cb){ cb.checked = true; });
+  });
+
+  document.getElementById('export-csv').addEventListener('click', async function(){
+    const picked = Array.from(document.querySelectorAll('.pick-row:checked')).map(cb=>cb.dataset.u);
+    if (!picked.length) { alert('Selecciona al menos una cuenta.'); return; }
+    const csv = 'usuario\n' + picked.map(u=>'@'+u).join('\n');
+    if (downloads) {
+      try {
+        await downloads.save({ filename: 'dejar-de-seguir.csv', data: csv });
+        return;
+      } catch(e){}
+    }
+    // fallback: open as data URI
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'dejar-de-seguir.csv'; a.click();
+  });
+
+  // ---------- Shared: never trust AI-generated (or uploaded) text as HTML ----------
+  function escapeHtml(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ---------- Sample (AI) helpers ----------
+  async function runSample(outEl, prompt){
+    if (!sampler) {
+      outEl.classList.remove('empty');
+      outEl.textContent = 'Esta función de IA no está disponible en esta vista todavía.';
+      return;
+    }
+    outEl.classList.remove('empty');
+    outEl.innerHTML = 'Pensando<span class="loading-dots"></span>';
+    const t = makeTimeoutSignal(30000);
+    try {
+      const res = await sampler(prompt, {
+        modelTier: 'default',
+        signal: t.signal,
+        onText: function(chunk){ outEl.textContent = chunk.text; }
+      });
+      outEl.textContent = res.text;
+    } catch(err){
+      outEl.textContent = sampleErrorText(err).text;
+    } finally {
+      t.clear();
+    }
+  }
+
+  document.getElementById('run-potencial').addEventListener('click', function(){
+    const niche = document.getElementById('pot-niche').value.trim() || 'sin especificar';
+    const freq = document.getElementById('pot-freq').value;
+    const goal = document.getElementById('pot-goal').value.trim() || 'sin especificar';
+    const followers = state.followers != null ? state.followers : 'no especificado';
+    const following = state.following != null ? state.following : 'no especificado';
+    const prompt = 'Eres un consultor de crecimiento en Instagram, directo y práctico, sin relleno. ' +
+      'Un usuario te da estos datos de su cuenta:\n' +
+      '- Nicho/tema: ' + niche + '\n' +
+      '- Frecuencia de publicación: ' + freq + '\n' +
+      '- Seguidores actuales: ' + followers + '\n' +
+      '- Cuentas que sigue: ' + following + '\n' +
+      '- Objetivo con su Instagram: ' + goal + '\n\n' +
+      'Escribe en español, tono cercano pero profesional, sin emojis excesivos. Da: ' +
+      '1) un diagnóstico honesto de su potencial actual en 2-3 frases, ' +
+      '2) 3 cosas concretas que debería mejorar en su perfil o estrategia, con acciones específicas (no genéricas), ' +
+      '3) una sugerencia de cómo posicionarse frente a su nicho. Máximo 220 palabras.';
+    runSample(document.getElementById('out-potencial'), prompt);
+  });
+
+  document.getElementById('run-contenido').addEventListener('click', function(){
+    const niche = document.getElementById('cont-niche').value.trim() || document.getElementById('pot-niche').value.trim() || 'sin especificar';
+    const diff = document.getElementById('cont-diff').value.trim() || 'sin especificar';
+    const prompt = 'Eres un estratega de contenido para Instagram. Un usuario tiene este nicho: "' + niche + '" ' +
+      'y esto lo distingue: "' + diff + '". ' +
+      'Dale en español 6 ideas de contenido concretas y accionables (mezcla de Reels y carruseles), cada una en una línea con formato "- [tipo de formato] Idea: por qué funciona". ' +
+      'Prioriza ideas de bajo costo de producción, específicas a su nicho real, no genéricas. No agregues introducción ni cierre, solo la lista.';
+    runSample(document.getElementById('out-contenido'), prompt);
+  });
+
+  // ---------- Productividad > IA ----------
+  const IA_LS_KEY = 'alegc_ia_state_v1';
+  let iaState = { ideas: [], savedForLater: [], hasGenerated: false };
+  let iaLoaded = false;
+  let iaGenerating = false;
+
+  function iaLocalSave(){ try { localStorage.setItem(IA_LS_KEY, JSON.stringify(iaState)); } catch(e){} }
+  function iaLocalLoad(){
+    try { const raw = localStorage.getItem(IA_LS_KEY); if (raw) iaState = Object.assign(iaState, JSON.parse(raw)); } catch(e){}
+  }
+  async function iaSaveState(){
+    iaLocalSave();
+    if (db) { try { await db.doc('alegc/ia').set(iaState); } catch(e){} }
+  }
+  async function iaLoadState(){
+    iaLocalLoad();
+    if (db) {
+      try { const doc = await db.doc('alegc/ia').get(); if (doc && doc.exists) iaState = Object.assign(iaState, doc.data()); } catch(e){}
+    }
+  }
+
+  function fmtDateTime(iso){
+    try {
+      return new Date(iso).toLocaleString('es', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    } catch(e){ return ''; }
+  }
+
+  const CATEGORY_ORDER = ['General','App','Página','Música','YouTube','Proyecto'];
+
+  // ---------- Sub-tabs (existentes / originales / guardadas) ----------
+  document.querySelectorAll('#ia-tabs .seg-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('#ia-tabs .seg-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('#view-ia .seg-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('iapanel-' + tab.dataset.iatab).classList.add('active');
+      document.getElementById('ia-ideas-toolbar').style.display = (tab.dataset.iatab === 'guardadas') ? 'none' : 'flex';
+    });
+  });
+
+  // ---------- Sub-tabs (Aprendizaje: recomendados / guardados) ----------
+  document.querySelectorAll('#ap-tabs .seg-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('#ap-tabs .seg-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('#view-aprendizaje .seg-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('appanel-' + tab.dataset.aptab).classList.add('active');
+      document.getElementById('ap-toolbar').style.display = (tab.dataset.aptab === 'guardados') ? 'none' : 'flex';
+    });
+  });
+
+  function ideaCardHtml(idea){
+    const typeTag = idea.type === 'original'
+      ? '<span class="tag-original">Crear desde cero</span>'
+      : '<span class="tag-existente">Ya existe</span>';
+    return '<div class="idea-card type-' + (idea.type || 'existente') + '" data-id="' + idea.id + '">' +
+      '<div class="idea-top">' +
+        '<div>' + typeTag + '<h4>' + escapeHtml(idea.title) + '</h4><p class="idea-desc">' + escapeHtml(idea.desc) + '</p></div>' +
+        '<div class="idea-actions">' +
+          '<button class="icon-btn flag-btn" title="Guardar para más tarde" data-id="' + idea.id + '">🚩</button>' +
+          '<button class="icon-btn trash-btn" title="Descartar" data-id="' + idea.id + '">🗑️</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="idea-meta">Generado: ' + fmtDateTime(idea.generatedAt) + '</div>' +
+    '</div>';
+  }
+
+  function renderIdeaGroup(containerId, list){
+    const wrap = document.getElementById(containerId);
+    if (!list.length) {
+      wrap.innerHTML = '<p class="empty-note">No hay ideas activas en esta sección. Presiona "Reiniciar ideas" para generar nuevas.</p>';
+      return;
+    }
+    const groups = {};
+    list.forEach(function(idea){
+      const cat = idea.category || 'General';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(idea);
+    });
+    const orderedCats = Object.keys(groups).sort(function(a,b){
+      const ai = CATEGORY_ORDER.indexOf(a), bi = CATEGORY_ORDER.indexOf(b);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
+    let html = '';
+    orderedCats.forEach(function(cat){
+      html += '<div class="category-heading">' + escapeHtml(cat) + '</div>';
+      groups[cat].forEach(function(idea){ html += ideaCardHtml(idea); });
+    });
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.flag-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ flagIdea(btn.dataset.id); });
+    });
+    wrap.querySelectorAll('.trash-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ trashIdea(btn.dataset.id); });
+    });
+  }
+
+  function renderAllIdeas(){
+    const existentes = iaState.ideas.filter(i=>i.type === 'existente');
+    const originales = iaState.ideas.filter(i=>i.type === 'original');
+    renderIdeaGroup('ia-groups-existentes', existentes);
+    renderIdeaGroup('ia-groups-originales', originales);
+    document.getElementById('ia-meta').textContent =
+      existentes.length + ' con herramientas existentes · ' + originales.length + ' para crear desde cero';
+  }
+
+  function flagIdea(id){
+    const idx = iaState.ideas.findIndex(i=>i.id === id);
+    if (idx === -1) return;
+    const idea = iaState.ideas.splice(idx, 1)[0];
+    iaState.savedForLater.unshift(idea);
+    iaSaveState();
+    renderAllIdeas();
+    renderSaved();
+  }
+
+  function trashIdea(id){
+    iaState.ideas = iaState.ideas.filter(i=>i.id !== id);
+    iaSaveState();
+    renderAllIdeas();
+  }
+
+  function renderSaved(){
+    const wrap = document.getElementById('ia-saved-list');
+    const badge = document.getElementById('saved-count-badge');
+    badge.textContent = iaState.savedForLater.length;
+    if (!iaState.savedForLater.length) {
+      wrap.innerHTML = '<p class="empty-note">Aún no has guardado ninguna idea.</p>';
+      return;
+    }
+    wrap.innerHTML = iaState.savedForLater.map(function(idea){
+      const typeTag = idea.type === 'original'
+        ? '<span class="tag-original">Crear desde cero</span>'
+        : '<span class="tag-existente">Ya existe</span>';
+      return '<div class="saved-item" data-type="' + (idea.type || 'existente') + '">' +
+        '<div>' + typeTag + '<span class="badge">' + escapeHtml(idea.category||'General') + '</span>' +
+        '<h4>' + escapeHtml(idea.title) + '</h4>' +
+        '<p>' + escapeHtml(idea.desc) + '</p></div>' +
+        '<button class="icon-btn remove-saved-btn" title="Quitar de guardados" data-id="' + idea.id + '">🗑️</button>' +
+      '</div>';
+    }).join('');
+    wrap.querySelectorAll('.remove-saved-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        iaState.savedForLater = iaState.savedForLater.filter(i=>i.id !== btn.dataset.id);
+        iaSaveState();
+        renderSaved();
+      });
+    });
+  }
+
+  function setLoadingUI(msg){
+    document.getElementById('ia-groups-existentes').innerHTML = '<p class="empty-note">' + msg + '<span class="loading-dots"></span></p>';
+    document.getElementById('ia-groups-originales').innerHTML = '<p class="empty-note">' + msg + '<span class="loading-dots"></span></p>';
+    document.getElementById('ia-meta').textContent = 'Generando…';
+  }
+
+  function setResetButtonState(disabled, label){
+    const btn = document.getElementById('ia-reset');
+    btn.disabled = disabled;
+    btn.textContent = label;
+  }
+
+  // ---------- Shared: turn a sample() rejection into viewer copy ----------
+  function sampleErrorText(err){
+    const code = err && err.code;
+    const hideCodes = ['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
+    if (hideCodes.indexOf(code) !== -1) return { hide: true, text: 'La generación con IA no está disponible en esta vista.' };
+    if (code === 'rate_limited') return { hide: false, text: 'Hay demasiadas solicitudes ahora mismo. Espera un momento y vuelve a intentar.' };
+    if (code === 'cancelled') return { hide: false, text: 'Se tardó demasiado en responder. Intenta de nuevo.' };
+    if (code === 'invalid_json' || code === 'invalid_request' || code === 'prompt_too_large') return { hide: false, text: 'Hubo un problema con el formato de la respuesta.' };
+    if (code === 'refused') return { hide: false, text: 'No se pudo generar esa respuesta.' };
+    return { hide: false, text: 'No se pudo generar ahora mismo.' };
+  }
+
+  // ---------- Shared: never let a sample() call hang forever ----------
+  function makeTimeoutSignal(ms){
+    const controller = new AbortController();
+    const timer = setTimeout(function(){ controller.abort(); }, ms);
+    return { signal: controller.signal, clear: function(){ clearTimeout(timer); } };
+  }
+
+  const IA_PROMPT = 'Genera exactamente 12 ideas de cosas relacionadas con inteligencia artificial para que una persona curiosa las pruebe o construya. ' +
+    'Divide las 12 en dos tipos EXACTOS, 6 de cada uno: ' +
+    '"existente" = una herramienta, app, página o género/técnica musical que YA EXISTE hoy y la persona puede abrir y usar ahora mismo (nombra la herramienta o el tipo de herramienta real); ' +
+    '"original" = un concepto que NO existe todavía tal cual, algo original que se podría diseñar y construir desde cero (una app, página, proyecto, pieza musical o formato de video nuevo, pensado para resolver algo real o ser genuinamente innovador). ' +
+    'Cada idea también lleva una categoría: "App", "Página", "Música", "YouTube" o "Proyecto" (usa "General" solo si de verdad no encaja en ninguna). ' +
+    'Reparte las categorías con variedad, no repitas la misma categoría en todas. Sé específico y accionable, nunca genérico ni vago. Varía tus respuestas cada vez que te pidan esto, no repitas siempre las mismas ideas. Responde en español. ' +
+    'Responde SOLO con un array JSON, sin texto antes ni después, con este formato exacto: ' +
+    '[{"type":"existente|original","category":"App|Página|Música|YouTube|Proyecto|General","title":"string corto","desc":"1-2 frases explicando qué es y por qué vale la pena"}]';
+
+  async function generateIdeas(){
+    if (iaGenerating) return;
+    if (!sampler) {
+      document.getElementById('ia-groups-existentes').innerHTML = '<p class="empty-note">La generación de ideas con IA no está disponible en esta vista.</p>';
+      document.getElementById('ia-groups-originales').innerHTML = '<p class="empty-note">La generación de ideas con IA no está disponible en esta vista.</p>';
+      return;
+    }
+    iaGenerating = true;
+    setResetButtonState(true, 'Generando…');
+    setLoadingUI('Generando ideas');
+
+    let result = null;
+    const t = makeTimeoutSignal(30000);
+    try {
+      result = await sampler.json(IA_PROMPT, { modelTier: 'default', cache: false, signal: t.signal });
+    } catch(err){
+      const info = sampleErrorText(err);
+      const wrap1 = document.getElementById('ia-groups-existentes');
+      const wrap2 = document.getElementById('ia-groups-originales');
+      if (info.hide) {
+        wrap1.innerHTML = '<p class="empty-note">' + info.text + '</p>';
+        wrap2.innerHTML = '';
+      } else {
+        wrap1.innerHTML = '<p class="empty-note">' + info.text + ' <button class="btn small secondary" id="ia-retry-inline">Reintentar</button></p>';
+        wrap2.innerHTML = '';
+        const retryBtn = document.getElementById('ia-retry-inline');
+        if (retryBtn) retryBtn.addEventListener('click', generateIdeas);
+      }
+      document.getElementById('ia-meta').textContent = 'Sin ideas activas';
+      iaGenerating = false;
+      setResetButtonState(false, '↻ Reiniciar ideas');
+      t.clear();
+      return;
+    }
+    t.clear();
+
+    const now = new Date().toISOString();
+    const list = Array.isArray(result) ? result : (result.ideas || []);
+    iaState.ideas = list.map(function(it, i){
+      return {
+        id: 'idea_' + Date.now() + '_' + i,
+        type: (it.type === 'original') ? 'original' : 'existente',
+        category: it.category || 'General',
+        title: it.title || 'Idea sin título',
+        desc: it.desc || '',
+        generatedAt: now
+      };
+    });
+    iaState.hasGenerated = true;
+    await iaSaveState();
+    renderAllIdeas();
+    iaGenerating = false;
+    setResetButtonState(false, '↻ Reiniciar ideas');
+  }
+
+  document.getElementById('ia-reset').addEventListener('click', generateIdeas);
+
+  async function initIA(){
+    if (iaLoaded) return;
+    iaLoaded = true;
+    await iaLoadState();
+    renderSaved();
+    if (!iaState.hasGenerated && iaState.ideas.length === 0) {
+      await generateIdeas();
+    } else {
+      renderAllIdeas();
+    }
+  }
+
+  // ---------- Aprendizaje > YouTube ----------
+  const AP_LS_KEY = 'alegc_aprendizaje_v1';
+  let apState = { feed: [], savedForLater: [], lastGeneratedDate: null };
+  let apLoaded = false;
+  let apGenerating = false;
+
+  function todayStr(){ return new Date().toISOString().slice(0, 10); }
+
+  function apLocalSave(){ try { localStorage.setItem(AP_LS_KEY, JSON.stringify(apState)); } catch(e){} }
+  function apLocalLoad(){
+    try { const raw = localStorage.getItem(AP_LS_KEY); if (raw) apState = Object.assign(apState, JSON.parse(raw)); } catch(e){}
+  }
+  async function apSaveState(){
+    apLocalSave();
+    if (db) { try { await db.doc('alegc/aprendizaje').set(apState); } catch(e){} }
+  }
+  async function apLoadState(){
+    apLocalLoad();
+    if (db) {
+      try { const doc = await db.doc('alegc/aprendizaje').get(); if (doc && doc.exists) apState = Object.assign(apState, doc.data()); } catch(e){}
+    }
+  }
+
+  const AP_THUMB_MAP = {
+    'Teorías':          { a: '#B8912E', b: '#6B531A', icon: '💡' },
+    'Historias':        { a: '#A9532F', b: '#5E2C18', icon: '📜' },
+    'Tutoriales':       { a: '#2E4A38', b: '#16261E', icon: '🛠️' },
+    'Cine':             { a: '#4A3A5A', b: '#241C30', icon: '🎬' },
+    'Psicología':       { a: '#2E4A5A', b: '#1C2E3A', icon: '🧠' },
+    'Videojuegos':      { a: '#5A2E44', b: '#2E1C24', icon: '🕹️' },
+    'Relaciones':       { a: '#A9532F', b: '#B8912E', icon: '💞' },
+    'Proyectos de IA':  { a: '#16261E', b: '#B8912E', icon: '🤖' }
+  };
+  function thumbSvg(category){
+    const c = AP_THUMB_MAP[category] || { a: '#6B655A', b: '#3A362F', icon: '▶️' };
+    const gid = 'g' + Math.random().toString(36).slice(2, 9);
+    return '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + escapeHtml(category) + '">' +
+      '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0%" stop-color="' + c.a + '"/><stop offset="100%" stop-color="' + c.b + '"/>' +
+      '</linearGradient></defs>' +
+      '<rect width="320" height="180" fill="url(#' + gid + ')"/>' +
+      '<text x="160" y="94" font-size="52" text-anchor="middle" dominant-baseline="middle">' + c.icon + '</text>' +
+      '<circle cx="160" cy="146" r="15" fill="rgba(255,255,255,0.22)"/>' +
+      '<path d="M155 139 L155 153 L168 146 Z" fill="#fff" opacity="0.9"/>' +
+    '</svg>';
+  }
+
+  const AP_CATEGORY_POOL = 'Teorías, Historias, Tutoriales, Cine, Psicología, Videojuegos, Relaciones, Proyectos de IA';
+  const AP_PROMPT = 'Genera exactamente 6 ideas de videos de YouTube, cada una de una categoría distinta de esta lista (usa las 6 más variadas posibles, no repitas categoría): ' + AP_CATEGORY_POOL + '. ' +
+    'Están pensadas para alguien que suele ver videos mientras come o descansa, y a quien le gustan temas como: por qué las relaciones de hoy son más sencillas, teorías de cómo la IA podría dominar el mundo, ideas de proyectos con IA, cine, psicología, videojuegos, historias y documentales, y tutoriales prácticos. ' +
+    'No propongas noticias de actualidad ni nada con fecha de caducidad — eso será una sección aparte más adelante. Sé específico, nunca genérico, y varía las ideas cada vez que te pidan esto. Responde en español. ' +
+    'Responde SOLO con un array JSON, sin texto antes ni después, con este formato exacto: ' +
+    '[{"category":"Teorías|Historias|Tutoriales|Cine|Psicología|Videojuegos|Relaciones|Proyectos de IA","title":"título llamativo y específico, como lo buscarías en YouTube","hook":"1-2 frases explicando por qué vale la pena verlo","search_query":"la búsqueda exacta en español que se debería escribir en YouTube para encontrar justo este tipo de video"}]';
+
+  function videoCardHtml(v, savedView){
+    const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(v.query || v.title);
+    const actions = savedView
+      ? '<div class="icon-group"><button class="icon-btn remove-video-btn" title="Quitar de guardados" data-id="' + v.id + '">🗑️</button></div>'
+      : '<div class="icon-group">' +
+          '<button class="icon-btn flag-video-btn" title="Guardar para más tarde" data-id="' + v.id + '">🚩</button>' +
+          '<button class="icon-btn trash-video-btn" title="Quitar del feed" data-id="' + v.id + '">🗑️</button>' +
+        '</div>';
+    return '<div class="video-card" data-id="' + v.id + '">' +
+      '<div class="video-thumb">' + thumbSvg(v.category) + '</div>' +
+      '<div class="video-body">' +
+        '<span class="badge">' + escapeHtml(v.category) + '</span>' +
+        '<h4>' + escapeHtml(v.title) + '</h4>' +
+        '<p class="video-reason">' + escapeHtml(v.hook) + '</p>' +
+      '</div>' +
+      '<div class="video-actions-row">' +
+        '<a class="btn small" href="' + ytUrl + '" target="_blank" rel="noopener">▶ Ver</a>' +
+        actions +
+      '</div>' +
+      '<div class="video-meta">Sugerido: ' + fmtDateTime(v.generatedAt) + '</div>' +
+    '</div>';
+  }
+
+  function renderFeed(){
+    const grid = document.getElementById('ap-grid');
+    const meta = document.getElementById('ap-meta');
+    if (!apState.feed.length) {
+      grid.innerHTML = '<p class="empty-note">No hay recomendaciones activas. Presiona "Nuevas recomendaciones".</p>';
+      meta.textContent = 'Sin recomendaciones';
+      return;
+    }
+    grid.innerHTML = apState.feed.map(function(v){ return videoCardHtml(v, false); }).join('');
+    meta.textContent = apState.feed.length + ' recomendaciones';
+    grid.querySelectorAll('.flag-video-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ flagVideo(btn.dataset.id); });
+    });
+    grid.querySelectorAll('.trash-video-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ trashVideo(btn.dataset.id); });
+    });
+  }
+
+  function renderSavedVideos(){
+    const grid = document.getElementById('ap-saved-grid');
+    const badge = document.getElementById('ap-saved-count');
+    badge.textContent = apState.savedForLater.length;
+    if (!apState.savedForLater.length) {
+      grid.innerHTML = '<p class="empty-note">Aún no has guardado ningún video.</p>';
+      return;
+    }
+    grid.innerHTML = apState.savedForLater.map(function(v){ return videoCardHtml(v, true); }).join('');
+    grid.querySelectorAll('.remove-video-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        apState.savedForLater = apState.savedForLater.filter(v=>v.id !== btn.dataset.id);
+        apSaveState();
+        renderSavedVideos();
+      });
+    });
+  }
+
+  function flagVideo(id){
+    const idx = apState.feed.findIndex(v=>v.id === id);
+    if (idx === -1) return;
+    const v = apState.feed.splice(idx, 1)[0];
+    apState.savedForLater.unshift(v);
+    apSaveState();
+    renderFeed();
+    renderSavedVideos();
+  }
+  function trashVideo(id){
+    apState.feed = apState.feed.filter(v=>v.id !== id);
+    apSaveState();
+    renderFeed();
+  }
+
+  function setApButtonState(disabled, label){
+    const btn = document.getElementById('ap-refresh');
+    btn.disabled = disabled;
+    btn.textContent = label;
+  }
+
+  async function generateFeed(){
+    if (apGenerating) return;
+    const grid = document.getElementById('ap-grid');
+    if (!sampler) {
+      grid.innerHTML = '<p class="empty-note">La generación con IA no está disponible en esta vista.</p>';
+      return;
+    }
+    apGenerating = true;
+    setApButtonState(true, 'Generando…');
+    grid.innerHTML = '<p class="empty-note">Buscando cosas buenas para hoy<span class="loading-dots"></span></p>';
+    document.getElementById('ap-meta').textContent = 'Generando…';
+
+    let result = null;
+    const t = makeTimeoutSignal(30000);
+    try {
+      result = await sampler.json(AP_PROMPT, { modelTier: 'default', cache: false, signal: t.signal });
+    } catch(err){
+      t.clear();
+      const info = sampleErrorText(err);
+      if (info.hide) {
+        grid.innerHTML = '<p class="empty-note">' + info.text + '</p>';
+      } else {
+        grid.innerHTML = '<p class="empty-note">' + info.text + ' <button class="btn small secondary" id="ap-retry-inline">Reintentar</button></p>';
+        const retryBtn = document.getElementById('ap-retry-inline');
+        if (retryBtn) retryBtn.addEventListener('click', generateFeed);
+      }
+      document.getElementById('ap-meta').textContent = 'Sin recomendaciones';
+      apGenerating = false;
+      setApButtonState(false, '🔄 Nuevas recomendaciones');
+      return;
+    }
+    t.clear();
+
+    const now = new Date().toISOString();
+    const list = Array.isArray(result) ? result : (result.videos || []);
+    apState.feed = list.map(function(it, i){
+      return {
+        id: 'video_' + Date.now() + '_' + i,
+        category: it.category || 'General',
+        title: it.title || 'Video sin título',
+        hook: it.hook || '',
+        query: it.search_query || it.title,
+        generatedAt: now
+      };
+    });
+    apState.lastGeneratedDate = todayStr();
+    await apSaveState();
+    renderFeed();
+    apGenerating = false;
+    setApButtonState(false, '🔄 Nuevas recomendaciones');
+  }
+
+  document.getElementById('ap-refresh').addEventListener('click', generateFeed);
+
+  async function initAprendizaje(){
+    if (!apLoaded) { apLoaded = true; await apLoadState(); renderSavedVideos(); }
+    if (!apState.feed.length || apState.lastGeneratedDate !== todayStr()) {
+      await generateFeed();
+    } else {
+      renderFeed();
+    }
+  }
+
+  initCapabilities();
+})();
+</script>
+</body>
+</html>
