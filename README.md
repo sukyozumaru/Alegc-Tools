@@ -10,8 +10,6 @@ Alegc Tools junta en un solo lugar las herramientas que uso todos los días, con
 
 Es un proyecto vivo: lo sigo ajustando con ayuda de IA (Claude para construirlo, DeepSeek para revisarlo y pulirlo), así que va a seguir sumando categorías con el tiempo.
 
-**[→ Ver el sitio en vivo](PON_AQUI_TU_LINK_DE_GITHUB_PAGES)**
-
 ---
 
 ## Ver el sitio en tu navegador (sin subir nada)
