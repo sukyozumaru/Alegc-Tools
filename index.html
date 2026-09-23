@@ -1,12 +1,4 @@
 <!DOCTYPE html>
-<!--
-  Alegc Tools — panel personal
-  Las secciones que usan IA (Mi potencial, Ideas de contenido, IA, Aprendizaje/YouTube)
-  dependen de `window.claude.use(...)`, una función que solo existe dentro del
-  entorno de artefactos de Claude. Fuera de ahí (ej. GitHub Pages) esas secciones
-  se degradan a un mensaje "no disponible" en vez de fallar — el resto del sitio
-  (Instagram, diseño, guardado local) funciona igual. Ver README.md.
--->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -32,24 +24,13 @@
     --text-soft: #6B655A;
     --danger: #A13A2C;
     --clay-soft: #EFD9CE;
+    --green: #3E7A52;
+    --blue: #3B6FA0;
     --radius-lg: 18px;
     --radius-sm: 10px;
+    --shadow-sm: 0 1px 3px rgba(20,30,25,0.06);
+    --shadow-md: 0 6px 20px rgba(20,30,25,0.08);
   }
-  /* Note: --cream stays constant — it's the sidebar's text color, and the
-     sidebar background (--ink) never changes. Alegc Tools always renders in
-     its designed light palette; it does not auto-switch based on the
-     visitor's OS/browser dark-mode setting, only via an explicit data-theme
-     attribute (unused for now). */
-  :root[data-theme="dark"] {
-    --paper: #171613;
-    --paper-card: #201E1A;
-    --line: #33302A;
-    --text: #EDE8DD;
-    --text-soft: #A79E8D;
-    --callout-bg: #2A2620;
-    --clay-soft: #3A2A22;
-  }
-
   * { box-sizing: border-box; }
   html { color-scheme: light; }
   html, body {
@@ -59,20 +40,18 @@
     font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
     font-size: 15px;
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, .display {
+  h1, h2, h3, h4, .display {
     font-family: 'Fraunces', Georgia, serif;
     font-weight: 500;
     letter-spacing: -0.01em;
     color: var(--ink);
   }
-  :root[data-theme="dark"] h1, :root[data-theme="dark"] h2, :root[data-theme="dark"] h3, :root[data-theme="dark"] .display {
-    color: var(--text);
-  }
 
   .app { display: flex; min-height: 100vh; }
 
-  /* Sidebar */
+  /* SIDEBAR */
   .sidebar {
     width: 252px;
     flex-shrink: 0;
@@ -81,14 +60,13 @@
     padding: 28px 18px;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 22px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
   }
-  .brand {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 0 8px;
-  }
+  .brand { display: flex; flex-direction: column; gap: 2px; padding: 0 8px; }
   .brand .mark {
     font-family: 'Fraunces', serif;
     font-size: 22px;
@@ -98,11 +76,14 @@
   .brand .mark em { color: var(--gold-soft); font-style: normal; }
   .brand .sub { font-size: 12.5px; color: #9FAE9F; }
 
-  .nav-group { display: flex; flex-direction: column; gap: 4px; }
+  .nav-group { display: flex; flex-direction: column; gap: 3px; }
   .nav-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #8DA08D;
     padding: 6px 10px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
   }
   .nav-item {
     display: flex; align-items: center; gap: 10px;
@@ -116,36 +97,37 @@
     width: 100%;
     text-align: left;
     font-family: inherit;
+    transition: background 0.15s;
   }
   .nav-item:hover { background: rgba(255,255,255,0.06); }
   .nav-item.active {
     background: rgba(233, 221, 184, 0.14);
     color: var(--gold-soft);
   }
-  .nav-sub { padding-left: 26px; display: flex; flex-direction: column; gap: 2px; margin-top: 2px;}
   .nav-item.disabled {
     color: #5C6B5C;
     cursor: default;
+    pointer-events: none;
   }
-  .nav-item.disabled:hover { background: none; }
   .soon-tag {
     margin-left: auto;
-    font-size: 10.5px;
+    font-size: 10px;
     color: #6C7C6C;
     border: 1px solid #3A4A3A;
     padding: 1px 6px;
     border-radius: 20px;
   }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink:0;}
-
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink: 0; }
   .sidebar-foot {
     margin-top: auto;
-    font-size: 12px;
+    font-size: 11.5px;
     color: #6C7C6C;
-    padding: 0 8px;
+    padding: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    line-height: 1.5;
   }
 
-  /* Main */
+  /* MAIN */
   .main { flex: 1; min-width: 0; padding: 34px 44px 60px; overflow-x: hidden; }
   .crumb { font-size: 13px; color: var(--text-soft); margin-bottom: 6px; }
   .crumb b { color: var(--text); font-weight: 600; }
@@ -163,13 +145,14 @@
     font-family: inherit;
     position: relative;
     top: 1px;
+    transition: color 0.15s;
   }
+  .tab:hover, .seg-tab:hover { color: var(--ink); }
   .tab.active, .seg-tab.active {
     color: var(--ink);
     font-weight: 600;
     border-bottom: 2px solid var(--gold);
   }
-  :root[data-theme="dark"] .tab.active, :root[data-theme="dark"] .seg-tab.active { color: var(--text); }
 
   .panel, .seg-panel { display: none; }
   .panel.active, .seg-panel.active { display: block; }
@@ -179,8 +162,9 @@
   .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
   @media (max-width: 900px) {
     .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; }
-    .sidebar { width: 210px; }
-    .main { padding: 24px; }
+    .sidebar { width: 200px; padding: 20px 12px; }
+    .main { padding: 22px; }
+    .page-title { font-size: 24px; }
   }
 
   .card {
@@ -188,14 +172,16 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     padding: 22px;
+    box-shadow: var(--shadow-sm);
   }
   .card h3 { font-size: 16px; margin: 0 0 4px; }
-  .stat-num { font-size: 34px; font-family: 'Fraunces', serif; color: var(--ink); }
-  :root[data-theme="dark"] .stat-num { color: var(--text); }
+  .stat-num { font-size: 34px; font-family: 'Fraunces', serif; color: var(--ink); line-height: 1.1; }
   .stat-label { font-size: 13px; color: var(--text-soft); margin-top: 2px; }
+  .stat-card { transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
   .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-  .field label { font-size: 13px; color: var(--text-soft); }
+  .field label { font-size: 13px; color: var(--text-soft); font-weight: 500; }
   .field input, .field select, .field textarea {
     font-family: inherit;
     font-size: 14.5px;
@@ -204,6 +190,12 @@
     border-radius: var(--radius-sm);
     background: var(--paper);
     color: var(--text);
+    transition: border 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: white;
   }
   .field textarea { resize: vertical; min-height: 70px; }
 
@@ -213,15 +205,18 @@
     border: none; padding: 11px 18px;
     border-radius: 999px; font-size: 14px; font-weight: 500;
     cursor: pointer; font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
   }
   .btn:hover { background: var(--ink-soft); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn.secondary {
     background: transparent; color: var(--ink); border: 1px solid var(--line);
   }
-  :root[data-theme="dark"] .btn.secondary { color: var(--text); }
   .btn.secondary:hover { background: rgba(0,0,0,0.04); }
-  .btn:disabled { opacity: 0.5; cursor: default; }
   .btn.small { padding: 7px 14px; font-size: 13px; }
+  .btn.gold { background: var(--gold); color: white; }
+  .btn.gold:hover { background: #a3801f; }
 
   .callout {
     background: var(--callout-bg);
@@ -233,17 +228,178 @@
     margin-bottom: 22px;
     display: flex; gap: 12px;
   }
-  :root[data-theme="dark"] .callout { color: var(--text); }
-  .callout .icon { font-size: 18px; }
+  .callout .icon { font-size: 18px; flex-shrink: 0; }
 
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* HOME */
+  .home-greeting { font-size: 32px; margin: 0 0 4px; }
+  .home-date { color: var(--text-soft); margin-bottom: 26px; font-size: 15px; }
+  .home-widgets { display: grid; gap: 16px; grid-template-columns: 1.4fr 1fr; }
+  @media (max-width: 1000px) { .home-widgets { grid-template-columns: 1fr; } }
+  .home-widgets .card { padding: 22px 24px; }
+
+  .mini-cal { width: 100%; }
+  .mini-cal-head {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .mini-cal-head h3 { margin: 0; font-size: 15px; }
+  .mini-cal-nav { display: flex; gap: 4px; }
+  .mini-cal-nav button {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--paper);
+    cursor: pointer; color: var(--text); font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mini-cal-nav button:hover { background: var(--paper-card); border-color: var(--gold); }
+  .mini-cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  }
+  .mini-cal-dow {
+    text-align: center; font-size: 10.5px; color: var(--text-soft);
+    font-weight: 600; padding: 4px 0; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .mini-cal-day {
+    text-align: center; font-size: 12.5px; padding: 7px 0;
+    border-radius: 7px; cursor: pointer; position: relative;
+    transition: background 0.12s; color: var(--text);
+  }
+  .mini-cal-day:hover { background: var(--paper); }
+  .mini-cal-day.other { color: #B5AFA2; opacity: 0.5; }
+  .mini-cal-day.today { background: var(--ink); color: var(--cream); font-weight: 600; }
+  .mini-cal-day.has-events::after {
+    content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--gold);
+  }
+  .mini-cal-day.today.has-events::after { background: var(--gold-soft); }
+
+  .agenda-list { list-style: none; padding: 0; margin: 12px 0 0; }
+  .agenda-item {
+    display: flex; gap: 10px; padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .agenda-item:last-child { border-bottom: none; }
+  .agenda-time {
+    font-size: 12px; color: var(--text-soft); font-weight: 600;
+    flex-shrink: 0; min-width: 50px;
+  }
+  .agenda-empty { color: var(--text-soft); font-size: 13.5px; padding: 14px 0; text-align: center; }
+
+  .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .quick-btn {
+    padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--paper); cursor: pointer; font-family: inherit;
+    font-size: 13px; color: var(--text); transition: all 0.12s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .quick-btn:hover { border-color: var(--gold); background: white; }
+
+  /* DIARIO */
+  .diario-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .diario-layout { grid-template-columns: 1fr; } }
+  .diario-textarea {
+    width: 100%; min-height: 180px; padding: 14px 16px;
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    font-family: inherit; font-size: 15px; line-height: 1.6;
+    background: var(--paper); resize: vertical;
+    transition: border 0.15s;
+  }
+  .diario-textarea:focus { outline: none; border-color: var(--gold); background: white; }
+  .diario-meta-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px; gap: 10px; flex-wrap: wrap;
+  }
+  .mood-row { display: flex; gap: 6px; }
+  .mood-btn {
+    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
+    background: var(--paper); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .mood-btn:hover { transform: scale(1.08); }
+  .mood-btn.selected { background: var(--gold-soft); border-color: var(--gold); }
+
+  .entries-list { max-height: 560px; overflow-y: auto; padding-right: 4px; }
+  .entry-card {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 12px;
+    position: relative;
+  }
+  .entry-head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12.5px; color: var(--text-soft); margin-bottom: 8px;
+  }
+  .entry-mood { font-size: 16px; }
+  .entry-text { font-size: 14.5px; line-height: 1.6; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .entry-actions { display: flex; gap: 4px; }
+  .entry-actions button {
+    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line);
+    background: white; cursor: pointer; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    color: var(--text-soft);
+  }
+  .entry-actions button:hover { color: var(--danger); border-color: var(--danger); }
+  .empty-note { color: var(--text-soft); font-size: 13.5px; padding: 12px 0; text-align: center; }
+
+  /* CALENDARIO */
+  .cal-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  @media (max-width: 1000px) { .cal-layout { grid-template-columns: 1fr; } }
+  .cal-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+  }
+  .cal-header h3 { margin: 0; font-size: 20px; }
+  .cal-nav { display: flex; gap: 6px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-dow {
+    text-align: center; font-size: 11px; color: var(--text-soft);
+    font-weight: 600; padding: 8px 0; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .cal-day {
+    background: var(--paper); border-radius: 10px; padding: 10px 8px;
+    min-height: 78px; cursor: pointer; position: relative;
+    border: 1.5px solid transparent; transition: all 0.12s;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .cal-day:hover { background: white; border-color: var(--line); }
+  .cal-day.other { opacity: 0.35; }
+  .cal-day.today { background: var(--ink); color: var(--cream); }
+  .cal-day.today .cal-day-num { color: var(--cream); }
+  .cal-day.selected { border-color: var(--gold); background: white; }
+  .cal-day-num { font-size: 14px; font-weight: 500; }
+  .cal-day-event {
+    font-size: 10.5px; color: var(--text-soft); background: rgba(184,145,46,0.15);
+    padding: 2px 6px; border-radius: 4px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cal-day.today .cal-day-event { background: rgba(233,221,184,0.25); color: var(--cream); }
+
+  .events-panel h3 { margin: 0 0 14px; font-size: 17px; }
+  .event-item {
+    background: var(--paper); border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 8px; font-size: 14px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+    border-left: 3px solid var(--gold);
+  }
+  .event-item .event-time { font-size: 12px; color: var(--text-soft); margin-bottom: 2px; font-weight: 600; }
+  .event-item .event-text { word-break: break-word; }
+  .event-item button {
+    background: none; border: none; color: var(--text-soft); cursor: pointer;
+    font-size: 16px; padding: 0 4px; flex-shrink: 0;
+  }
+  .event-item button:hover { color: var(--danger); }
+
+  /* INSTAGRAM (kept) */
   .upload-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
   .upload-box {
     flex: 1; min-width: 220px;
     border: 1.5px dashed var(--line);
     border-radius: var(--radius-lg);
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
+    padding: 20px; text-align: center; cursor: pointer;
+    transition: border 0.15s;
   }
   .upload-box:hover { border-color: var(--gold); }
   .upload-box input { display: none; }
@@ -254,12 +410,9 @@
   td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
   tr:last-child td { border-bottom: none; }
   .username-link { color: var(--ink); text-decoration: none; font-weight: 500; }
-  :root[data-theme="dark"] .username-link { color: var(--text); }
   .username-link:hover { text-decoration: underline; }
-
   .table-wrap { max-height: 420px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); }
   .table-wrap table { min-width: 420px; }
-
   .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
   .toolbar .count { font-size: 13px; color: var(--text-soft); margin-right: auto; }
 
@@ -267,108 +420,171 @@
   .trend-card h3 { margin-bottom: 6px; }
   .trend-card p { color: var(--text-soft); margin: 0; font-size: 14px; max-width: 68ch; }
 
-  .ai-output {
+  .badge {
+    display: inline-block; font-size: 11px; padding: 2px 9px;
+    border-radius: 999px; background: var(--gold-soft); color: var(--ink); margin-left: 8px;
+  }
+
+  /* ASISTENTE (chat) */
+  .chat-wrap {
+    display: flex; flex-direction: column; height: calc(100vh - 220px);
+    min-height: 480px; background: var(--paper-card);
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .chat-head {
+    padding: 16px 22px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .chat-head .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--clay));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px;
+  }
+  .chat-head h3 { margin: 0; font-size: 16px; }
+  .chat-head p { margin: 0; font-size: 12px; color: var(--text-soft); }
+
+  .chat-body {
+    flex: 1; overflow-y: auto; padding: 22px;
+    display: flex; flex-direction: column; gap: 14px;
     background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: 20px 22px;
-    margin-top: 18px;
-    white-space: pre-wrap;
-    font-size: 14.5px;
-    line-height: 1.65;
-    min-height: 60px;
   }
-  .ai-output.empty { color: var(--text-soft); font-style: italic; }
-  .loading-dots::after {
-    content: '...';
-    animation: dots 1.2s steps(4, end) infinite;
+  .msg {
+    max-width: 76%; padding: 11px 15px; border-radius: 16px;
+    font-size: 14.5px; line-height: 1.55; white-space: pre-wrap;
+    word-break: break-word;
   }
-  @keyframes dots { 0%,20%{content:'.';} 40%{content:'..';} 60%,100%{content:'...';} }
+  .msg.user {
+    align-self: flex-end; background: var(--ink); color: var(--cream);
+    border-bottom-right-radius: 4px;
+  }
+  .msg.assistant {
+    align-self: flex-start; background: white; border: 1px solid var(--line);
+    color: var(--text); border-bottom-left-radius: 4px;
+  }
+  .msg.error {
+    align-self: flex-start; background: var(--clay-soft);
+    color: var(--danger); border: 1px solid #E8C4B5;
+    border-bottom-left-radius: 4px; font-size: 13.5px;
+  }
+  .msg.typing { color: var(--text-soft); font-style: italic; }
 
-  .badge { display:inline-block; font-size: 11px; padding: 2px 9px; border-radius: 999px; background: var(--gold-soft); color: var(--ink); margin-left: 8px; }
-  ::-webkit-scrollbar { width: 9px; height: 9px; }
-  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+  .chat-input-row {
+    padding: 14px 18px; border-top: 1px solid var(--line);
+    display: flex; gap: 10px; background: white; align-items: flex-end;
+  }
+  .chat-input-row textarea {
+    flex: 1; border: 1px solid var(--line); border-radius: 20px;
+    padding: 10px 16px; font-family: inherit; font-size: 14.5px;
+    resize: none; max-height: 120px; min-height: 42px;
+    background: var(--paper); line-height: 1.4;
+  }
+  .chat-input-row textarea:focus { outline: none; border-color: var(--gold); background: white; }
+  .chat-send-btn {
+    background: var(--ink); color: var(--cream); border: none;
+    width: 42px; height: 42px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .chat-send-btn:hover { background: var(--ink-soft); }
+  .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Views (top-level pages) */
-  .view { display: none; }
-  .view.active { display: block; }
+  .chat-suggestions {
+    display: flex; gap: 8px; flex-wrap: wrap; padding: 0 22px 14px;
+    background: var(--paper);
+  }
+  .chip {
+    padding: 7px 14px; border-radius: 999px; background: white;
+    border: 1px solid var(--line); font-size: 13px; cursor: pointer;
+    transition: all 0.12s; color: var(--text);
+  }
+  .chip:hover { border-color: var(--gold); background: var(--gold-soft); }
 
-  /* Idea cards (Productividad > IA) */
+  /* IDEAS IA */
   .category-heading {
-    font-size: 13.5px;
-    color: var(--text-soft);
-    margin: 26px 0 10px;
-    padding-bottom: 6px;
+    font-size: 13.5px; color: var(--text-soft);
+    margin: 26px 0 10px; padding-bottom: 6px;
     border-bottom: 1px solid var(--line);
+    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
   }
   .category-heading:first-child { margin-top: 0; }
   .idea-card {
-    background: var(--paper-card);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: 16px 18px 12px;
-    margin-bottom: 12px;
+    background: var(--paper-card); border: 1px solid var(--line);
+    border-left: 3px solid var(--line); border-radius: var(--radius-lg);
+    padding: 16px 18px 12px; margin-bottom: 12px;
   }
   .idea-card.type-existente { border-left-color: var(--gold); }
   .idea-card.type-original { border-left-color: var(--clay); }
   .idea-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
   .idea-top h4 {
-    font-family: 'Fraunces', serif;
-    font-size: 16px; font-weight: 500;
+    font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500;
     margin: 0 0 5px; color: var(--ink);
   }
-  :root[data-theme="dark"] .idea-top h4 { color: var(--text); }
   .idea-desc { color: var(--text-soft); font-size: 13.8px; margin: 0; max-width: 60ch; }
   .idea-actions { display: flex; gap: 6px; flex-shrink: 0; }
   .icon-btn {
     border: 1px solid var(--line); background: var(--paper);
     width: 30px; height: 30px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 13px; padding: 0;
-    color: var(--text);
+    cursor: pointer; font-size: 13px; padding: 0; color: var(--text);
+    transition: all 0.12s;
   }
   .icon-btn:hover { border-color: var(--gold); }
-  .icon-btn.is-flagged { background: var(--gold-soft); border-color: var(--gold); }
-  .idea-meta { margin-top: 8px; font-size: 11px; color: var(--text-soft); text-align: right; opacity: 0.8; }
+  .tag-existente, .tag-original {
+    display: inline-block; font-size: 10.5px; padding: 2px 8px;
+    border-radius: 999px; margin-right: 6px; margin-bottom: 6px;
+  }
+  .tag-existente { background: var(--gold-soft); color: #6B531A; }
+  .tag-original { background: var(--clay-soft); color: var(--clay); }
+
   .saved-item {
     display: flex; justify-content: space-between; align-items: flex-start;
-    gap: 12px; padding: 10px 0 10px 12px; border-bottom: 1px solid var(--line);
+    gap: 12px; padding: 12px 0 12px 12px; border-bottom: 1px solid var(--line);
   }
   .saved-item:last-child { border-bottom: none; }
   .saved-item[data-type="existente"] { border-left: 3px solid var(--gold); }
   .saved-item[data-type="original"] { border-left: 3px solid var(--clay); }
-  .saved-item h4 { font-size: 14.5px; margin: 0 0 3px; font-family: 'Fraunces', serif; color: var(--ink); font-weight: 500; }
-  :root[data-theme="dark"] .saved-item h4 { color: var(--text); }
+  .saved-item h4 { font-size: 14.5px; margin: 0 0 3px; font-family: 'Fraunces', serif; font-weight: 500; }
   .saved-item p { margin: 0; font-size: 13px; color: var(--text-soft); max-width: 58ch; }
-  .empty-note { color: var(--text-soft); font-size: 13.5px; padding: 6px 0; }
-  .tag-existente { display:inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 999px; background: var(--gold-soft); color: #6B531A; margin-right: 6px; margin-bottom: 6px; }
-  .tag-original { display:inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 999px; background: var(--clay-soft); color: var(--clay); margin-right: 6px; margin-bottom: 6px; }
 
-  /* Aprendizaje > YouTube */
+  /* YOUTUBE */
   .video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 16px;
   }
   .video-card {
-    background: var(--paper-card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    background: var(--paper-card); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s;
   }
-  .video-thumb { width: 100%; aspect-ratio: 16/9; display: block; line-height: 0; background: var(--line); }
+  .video-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .video-thumb { width: 100%; aspect-ratio: 16/9; background: var(--line); }
   .video-thumb svg { width: 100%; height: 100%; display: block; }
   .video-body { padding: 14px 16px 4px; flex: 1; }
-  .video-body h4 { font-family: 'Fraunces', serif; font-size: 15.5px; font-weight: 500; margin: 8px 0 6px; line-height: 1.3; color: var(--ink); }
-  :root[data-theme="dark"] .video-body h4 { color: var(--text); }
+  .video-body h4 {
+    font-family: 'Fraunces', serif; font-size: 15.5px; font-weight: 500;
+    margin: 8px 0 6px; line-height: 1.3; color: var(--ink);
+  }
   .video-reason { color: var(--text-soft); font-size: 13px; margin: 0; line-height: 1.5; }
   .video-actions-row { display: flex; align-items: center; gap: 8px; padding: 12px 16px 6px; }
   .video-actions-row .btn { padding: 7px 14px; font-size: 12.5px; }
   .icon-group { margin-left: auto; display: flex; gap: 6px; }
   .video-meta { padding: 0 16px 14px; font-size: 10.5px; color: var(--text-soft); opacity: 0.8; }
+
+  /* LOADING */
+  .loading-dots::after {
+    content: '...';
+    animation: dots 1.2s steps(4, end) infinite;
+  }
+  @keyframes dots { 0%,20%{content:'.';} 40%{content:'..';} 60%,100%{content:'...';} }
+
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: #cfc8b8; }
 </style>
 </head>
 <body>
@@ -377,238 +593,316 @@
   <aside class="sidebar">
     <div class="brand">
       <div class="mark">Alegc <em>Tools</em></div>
-      <div class="sub">panel personal · Gabo</div>
+      <div class="sub">tu espacio personal</div>
     </div>
 
     <nav class="nav-group">
-      <div class="nav-label">Red social</div>
-      <button class="nav-item active" data-view="instagram">
-        <span class="dot"></span> Instagram
-      </button>
+      <div class="nav-label">Inicio</div>
+      <button class="nav-item active" data-view="home"><span class="dot"></span> Dashboard</button>
     </nav>
 
     <nav class="nav-group">
-      <div class="nav-label">Productividad</div>
-      <button class="nav-item" data-view="ia">
-        <span class="dot"></span> IA
-      </button>
+      <div class="nav-label">Personal</div>
+      <button class="nav-item" data-view="diario"><span class="dot"></span> Diario</button>
+      <button class="nav-item" data-view="calendario"><span class="dot"></span> Calendario</button>
     </nav>
 
     <nav class="nav-group">
-      <div class="nav-label">Aprendizaje</div>
-      <button class="nav-item" data-view="aprendizaje">
-        <span class="dot"></span> YouTube
-      </button>
+      <div class="nav-label">Inteligencia artificial</div>
+      <button class="nav-item" data-view="asistente"><span class="dot"></span> Asistente</button>
+      <button class="nav-item" data-view="ia"><span class="dot"></span> Ideas IA</button>
+    </nav>
+
+    <nav class="nav-group">
+      <div class="nav-label">Contenido</div>
+      <button class="nav-item" data-view="instagram"><span class="dot"></span> Instagram</button>
+      <button class="nav-item" data-view="aprendizaje"><span class="dot"></span> YouTube</button>
     </nav>
 
     <nav class="nav-group">
       <div class="nav-label">Próximamente</div>
-      <button class="nav-item disabled" disabled><span class="dot"></span> Noticias <span class="soon-tag">pronto</span></button>
-      <button class="nav-item disabled" disabled><span class="dot"></span> Finanzas <span class="soon-tag">pronto</span></button>
-      <button class="nav-item disabled" disabled><span class="dot"></span> Cocina &amp; recetas <span class="soon-tag">pronto</span></button>
+      <button class="nav-item disabled"><span class="dot"></span> Noticias <span class="soon-tag">pronto</span></button>
+      <button class="nav-item disabled"><span class="dot"></span> Finanzas <span class="soon-tag">pronto</span></button>
+      <button class="nav-item disabled"><span class="dot"></span> Cocina <span class="soon-tag">pronto</span></button>
     </nav>
 
-    <div class="sidebar-foot">Tus datos se procesan en tu navegador. Nada se sube a Instagram ni se comparte.</div>
+    <div class="sidebar-foot">Tus datos viven en tu navegador. Nada se comparte con terceros.</div>
   </aside>
 
   <main class="main">
-    <div class="view active" id="view-instagram">
-      <div class="crumb">Red social &nbsp;/&nbsp; <b>Instagram</b></div>
+
+    <!-- ====== HOME ====== -->
+    <div class="view active" id="view-home">
+      <h1 class="home-greeting" id="home-greeting">Hola 👋</h1>
+      <p class="home-date" id="home-date">—</p>
+
+      <div class="home-widgets">
+        <div class="card">
+          <div class="mini-cal-head">
+            <h3 id="mc-title">—</h3>
+            <div class="mini-cal-nav">
+              <button id="mc-prev" aria-label="Mes anterior">‹</button>
+              <button id="mc-next" aria-label="Mes siguiente">›</button>
+            </div>
+          </div>
+          <div class="mini-cal" id="mc-grid"></div>
+        </div>
+
+        <div class="card">
+          <h3>📌 Agenda de hoy</h3>
+          <ul class="agenda-list" id="home-agenda">
+            <li class="agenda-empty">Sin eventos para hoy.</li>
+          </ul>
+          <div class="quick-actions">
+            <button class="quick-btn" data-quick="diario">📔 Nueva entrada</button>
+            <button class="quick-btn" data-quick="calendario">📅 Agendar</button>
+            <button class="quick-btn" data-quick="asistente">💬 Preguntar a IA</button>
+          </div>
+        </div>
+
+        <div class="card stat-card" data-quick="diario">
+          <div class="stat-num" id="home-stat-entries">0</div>
+          <div class="stat-label">Entradas del diario</div>
+        </div>
+
+        <div class="card stat-card" data-quick="calendario">
+          <div class="stat-num" id="home-stat-events">0</div>
+          <div class="stat-label">Eventos agendados</div>
+        </div>
+
+        <div class="card stat-card" data-quick="ia">
+          <div class="stat-num" id="home-stat-ideas">0</div>
+          <div class="stat-label">Ideas guardadas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== DIARIO ====== -->
+    <div class="view" id="view-diario">
+      <div class="crumb">Personal &nbsp;/&nbsp; <b>Diario</b></div>
+      <h1 class="page-title">Diario</h1>
+      <p class="page-desc">Escribe lo que quieras: lo que pensaste, cómo te sentiste, qué hiciste hoy. Todo queda guardado solo en tu navegador.</p>
+
+      <div class="diario-layout">
+        <div class="card">
+          <h3>✍️ Nueva entrada</h3>
+          <div class="field" style="margin-top:14px;">
+            <label>¿Cómo te sientes hoy?</label>
+            <div class="mood-row" id="mood-row">
+              <button class="mood-btn" data-mood="😄" title="Genial">😄</button>
+              <button class="mood-btn" data-mood="🙂" title="Bien">🙂</button>
+              <button class="mood-btn" data-mood="😐" title="Normal">😐</button>
+              <button class="mood-btn" data-mood="😔" title="Bajón">😔</button>
+              <button class="mood-btn" data-mood="😤" title="Frustrado">😤</button>
+              <button class="mood-btn" data-mood="🤔" title="Pensativo">🤔</button>
+            </div>
+          </div>
+          <textarea class="diario-textarea" id="diario-input" placeholder="Hoy fue un día..."></textarea>
+          <div class="diario-meta-row">
+            <span style="font-size:12.5px; color:var(--text-soft);" id="diario-count">0 caracteres</span>
+            <button class="btn" id="diario-save">💾 Guardar entrada</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📚 Entradas anteriores</h3>
+          <div class="entries-list" id="entries-list" style="margin-top:14px;">
+            <p class="empty-note">Aún no has escrito nada. ¡Empieza hoy!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== CALENDARIO ====== -->
+    <div class="view" id="view-calendario">
+      <div class="crumb">Personal &nbsp;/&nbsp; <b>Calendario</b></div>
+      <h1 class="page-title">Calendario</h1>
+      <p class="page-desc">Agenda lo que necesites: reuniones, recordatorios, ideas, lo que sea. Se guarda automáticamente.</p>
+
+      <div class="cal-layout">
+        <div class="card">
+          <div class="cal-header">
+            <h3 id="cal-title">—</h3>
+            <div class="cal-nav">
+              <button class="btn small secondary" id="cal-prev">‹ Anterior</button>
+              <button class="btn small secondary" id="cal-today">Hoy</button>
+              <button class="btn small secondary" id="cal-next">Siguiente ›</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+
+        <div class="card events-panel">
+          <h3 id="events-title">📌 Eventos</h3>
+          <p style="font-size:13px; color:var(--text-soft); margin: 0 0 12px;" id="events-date">Selecciona un día</p>
+          <div id="events-list"><p class="empty-note">Ningún evento aún.</p></div>
+          <div class="field" style="margin-top:14px;">
+            <label>Nuevo evento</label>
+            <input type="text" id="event-input" placeholder="ej. Reunión a las 5pm">
+          </div>
+          <button class="btn gold" id="event-add" style="width:100%; justify-content:center;">➕ Agregar evento</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== ASISTENTE ====== -->
+    <div class="view" id="view-asistente">
+      <div class="crumb">Inteligencia artificial &nbsp;/&nbsp; <b>Asistente</b></div>
+      <h1 class="page-title">Asistente</h1>
+      <p class="page-desc">Habla con la IA como si fuera un amigo inteligente. Pregunta lo que quieras, pídele ideas, que te explique algo o que te ayude a pensar.</p>
+
+      <div class="chat-wrap">
+        <div class="chat-head">
+          <div class="avatar">✨</div>
+          <div>
+            <h3>Asistente Alegc</h3>
+            <p>Conectado · Respuestas en español</p>
+          </div>
+          <button class="btn small secondary" id="chat-clear" style="margin-left:auto;">🗑️ Limpiar</button>
+        </div>
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-suggestions" id="chat-suggestions">
+          <button class="chip">Dame una idea para un proyecto</button>
+          <button class="chip">Explícame algo complicado fácil</button>
+          <button class="chip">Ayúdame a escribir un mensaje</button>
+          <button class="chip">Recomiéndame una película</button>
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chat-input" placeholder="Escribe tu mensaje..." rows="1"></textarea>
+          <button class="chat-send-btn" id="chat-send" aria-label="Enviar">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== IDEAS IA ====== -->
+    <div class="view" id="view-ia">
+      <div class="crumb">Inteligencia artificial &nbsp;/&nbsp; <b>Ideas IA</b></div>
+      <h1 class="page-title">Ideas IA</h1>
+      <p class="page-desc">Dos mundos: herramientas que ya existen y puedes probar hoy, y conceptos originales que podrías construir desde cero.</p>
+
+      <div class="tabs" id="ia-tabs">
+        <button class="seg-tab active" data-iatab="existentes">Ya existen</button>
+        <button class="seg-tab" data-iatab="originales">Crear desde cero</button>
+        <button class="seg-tab" data-iatab="guardadas">Guardadas <span class="badge" id="saved-count-badge">0</span></button>
+      </div>
+
+      <div class="toolbar" id="ia-toolbar">
+        <span class="count" id="ia-meta">—</span>
+        <button class="btn small secondary" id="ia-refresh">✨ Generar nuevas</button>
+      </div>
+
+      <section class="seg-panel active" id="iapanel-existentes">
+        <div id="ia-groups-existentes"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
+      </section>
+      <section class="seg-panel" id="iapanel-originales">
+        <div id="ia-groups-originales"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
+      </section>
+      <section class="seg-panel" id="iapanel-guardadas">
+        <div id="ia-saved-list"><p class="empty-note">Aún no has guardado ninguna idea.</p></div>
+      </section>
+    </div>
+
+    <!-- ====== INSTAGRAM ====== -->
+    <div class="view" id="view-instagram">
+      <div class="crumb">Contenido &nbsp;/&nbsp; <b>Instagram</b></div>
       <h1 class="page-title">Instagram</h1>
-      <p class="page-desc">Analiza tu cuenta con tus propios datos exportados, revisa a quién dejar de seguir manualmente, y usa IA para entender tu potencial de perfil y qué contenido publicar.</p>
+      <p class="page-desc">Analiza tu cuenta con tus propios datos, revisa a quién dejar de seguir y usa la IA para entender tu potencial.</p>
 
       <div class="tabs">
         <button class="tab active" data-tab="resumen">Resumen</button>
         <button class="tab" data-tab="seguidores">Seguidores</button>
         <button class="tab" data-tab="tendencias">Tendencias</button>
         <button class="tab" data-tab="potencial">Mi potencial</button>
-        <button class="tab" data-tab="contenido">Ideas de contenido</button>
+        <button class="tab" data-tab="contenido">Ideas</button>
       </div>
 
-      <!-- RESUMEN -->
       <section class="panel active" id="panel-resumen">
         <div class="grid cols-3" style="margin-bottom:20px;">
-          <div class="card">
-            <div class="stat-num" id="stat-followers">—</div>
-            <div class="stat-label">Seguidores</div>
-          </div>
-          <div class="card">
-            <div class="stat-num" id="stat-following">—</div>
-            <div class="stat-label">Siguiendo</div>
-          </div>
-          <div class="card">
-            <div class="stat-num" id="stat-notback">—</div>
-            <div class="stat-label">No te siguen de vuelta</div>
-          </div>
+          <div class="card"><div class="stat-num" id="stat-followers">—</div><div class="stat-label">Seguidores</div></div>
+          <div class="card"><div class="stat-num" id="stat-following">—</div><div class="stat-label">Siguiendo</div></div>
+          <div class="card"><div class="stat-num" id="stat-notback">—</div><div class="stat-label">No te siguen</div></div>
         </div>
         <div class="card">
           <h3>Actualiza tus números</h3>
-          <p style="color:var(--text-soft); font-size:13.5px; margin-top:2px;">Escribe tus cifras actuales de Instagram, o ve a la pestaña Seguidores y sube tu archivo para que se calculen solas.</p>
           <div class="grid cols-2" style="margin-top:14px;">
-            <div class="field">
-              <label>Seguidores</label>
-              <input type="number" id="input-followers" placeholder="ej. 1240">
-            </div>
-            <div class="field">
-              <label>Siguiendo</label>
-              <input type="number" id="input-following" placeholder="ej. 980">
-            </div>
+            <div class="field"><label>Seguidores</label><input type="number" id="input-followers" placeholder="ej. 1240"></div>
+            <div class="field"><label>Siguiendo</label><input type="number" id="input-following" placeholder="ej. 980"></div>
           </div>
           <button class="btn" id="save-stats">Guardar</button>
         </div>
       </section>
 
-      <!-- SEGUIDORES -->
       <section class="panel" id="panel-seguidores">
         <div class="callout">
           <span class="icon">🛈</span>
-          <div>
-            <b>Por qué no hay login ni bot automático:</b> Instagram prohíbe en sus Términos de Servicio cualquier automatización de follow/unfollow, y suspende cuentas que lo intentan — no hay forma segura de hacerlo. En cambio, usamos el archivo que Instagram te deja descargar de ti mismo: <b>Configuración → Tu actividad → Descargar tu información → formato JSON → Conexiones (Seguidores y Seguidos)</b>. Todo el cálculo pasa aquí, en tu navegador.
-          </div>
+          <div>Instagram prohíbe la automatización de follow/unfollow. En su lugar usamos el archivo que Instagram te deja descargar: <b>Configuración → Tu actividad → Descargar tu información → JSON → Conexiones</b>. Todo el cálculo pasa en tu navegador.</div>
         </div>
-
         <div class="upload-row">
-          <label class="upload-box">
-            <input type="file" id="file-followers" accept=".json">
-            <div>📥 Subir <b>followers_1.json</b></div>
-            <div class="fn" id="fn-followers">Ningún archivo cargado</div>
-          </label>
-          <label class="upload-box">
-            <input type="file" id="file-following" accept=".json">
-            <div>📤 Subir <b>following.json</b></div>
-            <div class="fn" id="fn-following">Ningún archivo cargado</div>
-          </label>
+          <label class="upload-box"><input type="file" id="file-followers" accept=".json"><div>📥 <b>followers_1.json</b></div><div class="fn" id="fn-followers">Ningún archivo</div></label>
+          <label class="upload-box"><input type="file" id="file-following" accept=".json"><div>📤 <b>following.json</b></div><div class="fn" id="fn-following">Ningún archivo</div></label>
         </div>
-
         <div class="toolbar">
-          <span class="count" id="notback-count">Sube ambos archivos para ver tu lista</span>
+          <span class="count" id="notback-count">Sube ambos archivos</span>
           <button class="btn small secondary" id="select-all">Seleccionar todo</button>
-          <button class="btn small secondary" id="export-csv">Exportar seleccionados (CSV)</button>
+          <button class="btn small secondary" id="export-csv">Exportar CSV</button>
         </div>
-
         <div class="table-wrap">
-          <table>
-            <thead><tr><th style="width:34px;"></th><th>Cuenta</th><th>Revisado</th></tr></thead>
-            <tbody id="notback-body">
-              <tr><td colspan="3" style="color:var(--text-soft); text-align:center; padding:30px;">Aún no hay datos cargados.</td></tr>
-            </tbody>
-          </table>
+          <table><thead><tr><th style="width:34px;"></th><th>Cuenta</th><th>Revisado</th></tr></thead>
+          <tbody id="notback-body"><tr><td colspan="3" style="color:var(--text-soft); text-align:center; padding:30px;">Sin datos.</td></tr></tbody></table>
         </div>
       </section>
 
-      <!-- TENDENCIAS -->
       <section class="panel" id="panel-tendencias">
-        <p style="color:var(--text-soft); font-size:13px; margin-top:-10px; margin-bottom:22px;">Panorama de septiembre 2026 — se actualizará conforme cambien las tendencias.</p>
-
-        <div class="trend-card">
-          <h3>Lo que se comparte por DM gana más que lo que se pone "like"</h3>
-          <p>Las publicaciones que la gente reenvía a un amigo o colega por ser útiles o específicas están rindiendo mejor que el contenido pulido de marca. Antes de publicar, pregúntate: ¿esto es algo que alguien le mandaría a otra persona?</p>
-        </div>
-        <div class="trend-card">
-          <h3>Lo casero le está ganando a lo producido</h3>
-          <p>Reels grabados en una toma, hablando a cámara, mostrando trabajo real, generan más confianza que el video con mucha edición. No necesitas equipo caro para que funcione.</p>
-        </div>
-        <div class="trend-card">
-          <h3>Cada formato cumple un trabajo distinto</h3>
-          <p>Reels traen alcance nuevo, los carruseles construyen confianza y se guardan, las Historias generan respuestas directas. Usarlos todos, con un propósito distinto cada uno, rinde más que enfocarse solo en Reels.</p>
-        </div>
-        <div class="trend-card">
-          <h3>Publicar más no es lo mismo que crecer más</h3>
-          <p>El volumen de contenido subió en toda la plataforma, pero el alcance por publicación bajó. Lo que sí sube son las vistas totales y las interacciones cuando el contenido logra que te quedes viéndolo o lo vuelvan a ver — la calidad de retención importa más que la frecuencia.</p>
-        </div>
-        <div class="trend-card">
-          <h3>Instagram sigue siendo el lugar de compra favorito</h3>
-          <p>Para negocios y creadores con producto, Instagram es la plataforma donde más gente en EE.UU. prefiere comprar directamente, por delante de TikTok. Si vendes algo (comida, servicios), vale la pena facilitar el camino a la compra desde el perfil.</p>
-        </div>
+        <div class="trend-card"><h3>Lo que se comparte por DM gana más</h3><p>El contenido útil y específico que alguien le mandaría a un amigo rinde mejor que el pulido de marca.</p></div>
+        <div class="trend-card"><h3>Lo casero le gana a lo producido</h3><p>Reels en una toma, hablando a cámara, generan más confianza que videos muy editados.</p></div>
+        <div class="trend-card"><h3>Cada formato tiene un trabajo</h3><p>Reels traen alcance, carruseles construyen confianza, Historias generan respuestas.</p></div>
+        <div class="trend-card"><h3>Publicar más ≠ crecer más</h3><p>La retención importa más que la frecuencia. Mejor 3 posts buenos que 10 mediocres.</p></div>
       </section>
 
-      <!-- POTENCIAL -->
       <section class="panel" id="panel-potencial">
         <div class="card">
           <h3>Cuéntame de tu perfil</h3>
           <div class="grid cols-2" style="margin-top:14px;">
-            <div class="field">
-              <label>Tu nicho o tema principal</label>
-              <input type="text" id="pot-niche" placeholder="ej. cocina y pizzería, mundo culinario">
-            </div>
-            <div class="field">
-              <label>Con qué frecuencia publicas</label>
+            <div class="field"><label>Tu nicho</label><input type="text" id="pot-niche" placeholder="ej. cocina, fitness, arte..."></div>
+            <div class="field"><label>Frecuencia</label>
               <select id="pot-freq">
                 <option value="casi nunca">Casi nunca</option>
-                <option value="1 vez por semana">1 vez por semana</option>
-                <option value="2-3 veces por semana" selected>2-3 veces por semana</option>
+                <option value="1 vez por semana">1 vez/semana</option>
+                <option value="2-3 veces por semana" selected>2-3 por semana</option>
                 <option value="casi diario">Casi diario</option>
               </select>
             </div>
           </div>
-          <div class="field">
-            <label>¿Qué quieres lograr con tu Instagram?</label>
-            <textarea id="pot-goal" placeholder="ej. mostrar mi camino como cocinero, conseguir más clientes, crecer una marca personal en gastronomía..."></textarea>
-          </div>
+          <div class="field"><label>¿Qué quieres lograr?</label><textarea id="pot-goal" placeholder="ej. crecer una marca personal..."></textarea></div>
           <button class="btn" id="run-potencial">Analizar mi potencial</button>
         </div>
-        <div class="ai-output empty" id="out-potencial">Completa el formulario y presiona "Analizar mi potencial" para ver un diagnóstico hecho para tu perfil.</div>
+        <div class="card" style="margin-top:16px;">
+          <div class="ai-output" id="out-potencial" style="white-space:pre-wrap; font-size:14.5px; line-height:1.7; color:var(--text-soft); font-style:italic;">Completa el formulario para ver tu diagnóstico.</div>
+        </div>
       </section>
 
-      <!-- CONTENIDO -->
       <section class="panel" id="panel-contenido">
         <div class="card">
-          <h3>Ideas de contenido para ti</h3>
-          <p style="color:var(--text-soft); font-size:13.5px; margin-top:2px;">Usa la misma info de la pestaña "Mi potencial", o ajústala aquí.</p>
-          <div class="field" style="margin-top:14px;">
-            <label>Tema o nicho</label>
-            <input type="text" id="cont-niche" placeholder="ej. cocina y pizzería, mundo culinario">
-          </div>
-          <div class="field">
-            <label>Algo que te distingue (opcional)</label>
-            <input type="text" id="cont-diff" placeholder="ej. trabajo en cocina de pizzería, quiero mostrar mi camino aprendiendo el oficio">
-          </div>
-          <button class="btn" id="run-contenido">Generar ideas de contenido</button>
+          <h3>Ideas de contenido</h3>
+          <div class="field" style="margin-top:14px;"><label>Tema o nicho</label><input type="text" id="cont-niche" placeholder="ej. cocina y pizzería"></div>
+          <div class="field"><label>Algo que te distingue (opcional)</label><input type="text" id="cont-diff" placeholder="ej. trabajo en cocina de pizzería"></div>
+          <button class="btn" id="run-contenido">Generar ideas</button>
         </div>
-        <div class="ai-output empty" id="out-contenido">Presiona "Generar ideas de contenido" para recibir una lista pensada para tu nicho.</div>
+        <div class="card" style="margin-top:16px;">
+          <div class="ai-output" id="out-contenido" style="white-space:pre-wrap; font-size:14.5px; line-height:1.7; color:var(--text-soft); font-style:italic;">Presiona para generar ideas.</div>
+        </div>
       </section>
     </div>
 
-    <div class="view" id="view-ia">
-      <div class="crumb">Productividad &nbsp;/&nbsp; <b>IA</b></div>
-      <h1 class="page-title">IA</h1>
-      <p class="page-desc">Ideas para probar hoy, separadas en dos mundos: lo que ya existe y puedes usar ahora, y lo que aún no existe y podríamos construir juntos desde cero.</p>
-
-      <div class="tabs" id="ia-tabs">
-        <button class="seg-tab active" data-iatab="existentes">Herramientas que ya existen</button>
-        <button class="seg-tab" data-iatab="originales">Crear desde cero</button>
-        <button class="seg-tab" data-iatab="guardadas">Más tarde <span class="badge" id="saved-count-badge">0</span></button>
-      </div>
-
-      <div class="toolbar" id="ia-ideas-toolbar">
-        <span class="count" id="ia-meta">—</span>
-        <button class="btn small secondary" id="ia-reset">↻ Reiniciar ideas</button>
-      </div>
-
-      <section class="seg-panel active" id="iapanel-existentes">
-        <p class="page-desc" style="margin-top:-6px; font-size:13.5px;">Cosas que puedes abrir y probar ahora mismo: apps, páginas y herramientas de IA que ya están disponibles.</p>
-        <div id="ia-groups-existentes"><p class="empty-note">Cargando ideas…</p></div>
-      </section>
-
-      <section class="seg-panel" id="iapanel-originales">
-        <p class="page-desc" style="margin-top:-6px; font-size:13.5px;">Conceptos que todavía no existen tal cual — cosas que podríamos diseñar y construir juntos desde cero.</p>
-        <div id="ia-groups-originales"><p class="empty-note">Cargando ideas…</p></div>
-      </section>
-
-      <section class="seg-panel" id="iapanel-guardadas">
-        <p class="page-desc" style="margin-top:-6px; font-size:13.5px;">Ideas que marcaste con la bandera para retomar más adelante. Reiniciar ideas nunca toca esta lista.</p>
-        <div id="ia-saved-list"><p class="empty-note">Aún no has guardado ninguna idea.</p></div>
-      </section>
-    </div>
-
+    <!-- ====== YOUTUBE ====== -->
     <div class="view" id="view-aprendizaje">
-      <div class="crumb">Aprendizaje &nbsp;/&nbsp; <b>YouTube</b></div>
+      <div class="crumb">Contenido &nbsp;/&nbsp; <b>YouTube</b></div>
       <h1 class="page-title">YouTube</h1>
-      <p class="page-desc">Un feed de recomendaciones para ver mientras comes o descansas: teorías, historias, tutoriales y reflexiones sobre IA, cine, psicología, videojuegos y relaciones modernas. Nada de noticias por ahora — eso vendrá en su propia sección.</p>
+      <p class="page-desc">Un feed de recomendaciones: teorías, historias, tutoriales, cine, psicología, videojuegos y proyectos con IA. Perfecto para ver mientras comes o descansas.</p>
 
       <div class="tabs" id="ap-tabs">
         <button class="seg-tab active" data-aptab="recomendados">Recomendados</button>
-        <button class="seg-tab" data-aptab="guardados">Más tarde <span class="badge" id="ap-saved-count">0</span></button>
+        <button class="seg-tab" data-aptab="guardados">Guardados <span class="badge" id="ap-saved-count">0</span></button>
       </div>
 
       <div class="toolbar" id="ap-toolbar">
@@ -617,117 +911,482 @@
       </div>
 
       <section class="seg-panel active" id="appanel-recomendados">
-        <div class="video-grid" id="ap-grid"><p class="empty-note">Buscando algo bueno para hoy…</p></div>
+        <div class="video-grid" id="ap-grid"><p class="empty-note">Buscando cosas buenas<span class="loading-dots"></span></p></div>
       </section>
-
       <section class="seg-panel" id="appanel-guardados">
-        <div class="video-grid" id="ap-saved-grid"><p class="empty-note">Aún no has guardado ningún video.</p></div>
+        <div class="video-grid" id="ap-saved-grid"><p class="empty-note">Nada guardado aún.</p></div>
       </section>
     </div>
+
   </main>
 </div>
 
 <script>
 (function(){
-  // ---------- Top-level nav (sidebar views) ----------
-  document.querySelectorAll('.nav-item[data-view]').forEach(function(item){
-    item.addEventListener('click', function(){
-      document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.remove('active'));
-      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-      item.classList.add('active');
-      document.getElementById('view-' + item.dataset.view).classList.add('active');
-      if (item.dataset.view === 'ia') initIA();
-      if (item.dataset.view === 'aprendizaje') initAprendizaje();
-    });
-  });
+  'use strict';
 
-  // ---------- Tabs ----------
-  document.querySelectorAll('.tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-    });
-  });
-
-  // ---------- Capabilities ----------
-  let db = null, sampler = null, downloads = null;
-  async function initCapabilities(){
+  // ==================== UTILIDADES ====================
+  function escapeHtml(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  function escapeAttr(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+  function $(id){ return document.getElementById(id); }
+  function fmtDateTime(iso){
     try {
-      if (window.claude && window.claude.use) {
-        db = await window.claude.use('db').catch(()=>null);
-        sampler = await window.claude.use('sample').catch(()=>null);
-        downloads = await window.claude.use('downloads').catch(()=>null);
-      }
-    } catch(e) { /* no runtime available, degrade to localStorage only */ }
-    loadState();
+      return new Date(iso).toLocaleString('es', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    } catch(e){ return ''; }
   }
-
-  // ---------- State (db with localStorage fallback) ----------
-  const LS_KEY = 'alegc_instagram_state_v1';
-  let state = { followers: null, following: 0, notFollowingBack: [], reviewed: {}, profile: {} };
-
-  function localSave(){
-    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
-  }
-  function localLoad(){
+  function fmtDate(iso){
     try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (raw) state = Object.assign(state, JSON.parse(raw));
-    } catch(e){}
+      return new Date(iso).toLocaleDateString('es', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    } catch(e){ return ''; }
+  }
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function dateKey(y,m,d){ return y+'-'+pad(m+1)+'-'+pad(d); }
+
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#16261E;color:#F3EFE6;padding:11px 22px;border-radius:999px;font-size:14px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-family:Work Sans,sans-serif;';
+    document.body.appendChild(t);
+    setTimeout(() => {
+      t.style.transition = 'opacity 0.3s';
+      t.style.opacity = '0';
+      setTimeout(() => t.remove(), 300);
+    }, 2200);
   }
 
-  async function loadState(){
-    localLoad();
-    if (db) {
-      try {
-        const doc = await db.doc('alegc/instagram').get();
-        if (doc && doc.exists) state = Object.assign(state, doc.data());
-      } catch(e){}
+  function safeLocalGet(key, fallback){
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch(e){ return fallback; }
+  }
+  function safeLocalSet(key, value){
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch(e){
+      showToast('Almacenamiento lleno');
+      return false;
     }
-    renderStats();
+  }
+
+  // ==================== CLIENTE IA ====================
+  const AI_ENDPOINT = '/api/ia';
+
+  async function callAI(opts){
+    const payload = {
+      prompt: opts.prompt,
+      messages: opts.messages,
+      jsonMode: !!opts.jsonMode,
+      maxTokens: opts.maxTokens || 2048,
+      temperature: opts.temperature != null ? opts.temperature : 0.8
+    };
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+    try {
+      const res = await fetch(AI_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      let data;
+      try { data = await res.json(); } catch(e){ throw new Error('Respuesta inválida del servidor'); }
+      if (!res.ok) {
+        const err = new Error(data.error || 'Error al generar');
+        err.code = data.code;
+        throw err;
+      }
+      return data.text || '';
+    } catch(e){
+      if (e.name === 'AbortError') throw new Error('La IA tardó demasiado. Intenta de nuevo.');
+      throw e;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  async function callAIJson(opts){
+    const raw = await callAI({ ...opts, jsonMode: true });
+    try {
+      return JSON.parse(raw);
+    } catch(e){
+      const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      try { return JSON.parse(cleaned); }
+      catch(e2){ throw new Error('La IA devolvió un formato inesperado.'); }
+    }
+  }
+
+  // ==================== NAVEGACIÓN ====================
+  const navItems = document.querySelectorAll('.nav-item[data-view]');
+  const views = document.querySelectorAll('.view');
+  function goTo(viewName){
+    navItems.forEach(n => n.classList.toggle('active', n.dataset.view === viewName));
+    views.forEach(v => v.classList.toggle('active', v.id === 'view-' + viewName));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (viewName === 'home') renderHome();
+    if (viewName === 'diario') renderDiario();
+    if (viewName === 'calendario') renderCalendario();
+    if (viewName === 'ia') initIA();
+    if (viewName === 'aprendizaje') initAprendizaje();
+    if (viewName === 'asistente') initChat();
+    if (viewName === 'instagram') renderStats();
+  }
+  navItems.forEach(item => {
+    item.addEventListener('click', () => goTo(item.dataset.view));
+  });
+
+  // Tabs internos (genérico)
+  function bindTabs(tabsSelector, panelPrefix){
+    document.querySelectorAll(tabsSelector).forEach(tab => {
+      tab.addEventListener('click', () => {
+        const parent = tab.parentElement;
+        parent.querySelectorAll('.tab, .seg-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const key = tab.dataset.tab || tab.dataset.iatab || tab.dataset.aptab;
+        const container = tab.closest('.view') || document;
+        container.querySelectorAll('.panel, .seg-panel').forEach(p => p.classList.remove('active'));
+        const target = container.querySelector('#' + panelPrefix + key);
+        if (target) target.classList.add('active');
+      });
+    });
+  }
+  bindTabs('.tabs .tab', 'panel-');
+
+  // ==================== HOME ====================
+  let homeDate = new Date();
+
+  function renderHome(){
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = 'Hola 👋';
+    if (hour < 12) greeting = 'Buenos días ☀️';
+    else if (hour < 20) greeting = 'Buenas tardes 🌤️';
+    else greeting = 'Buenas noches 🌙';
+    $('home-greeting').textContent = greeting;
+    $('home-date').textContent = fmtDate(now.toISOString());
+
+    // Stats
+    const diario = safeLocalGet('alegc_diario_v2', []);
+    const eventos = safeLocalGet('alegc_eventos_v2', {});
+    const ideas = safeLocalGet('alegc_ia_saved_v2', []);
+    $('home-stat-entries').textContent = diario.length;
+    let totalEvents = 0;
+    Object.values(eventos).forEach(arr => totalEvents += (arr || []).length);
+    $('home-stat-events').textContent = totalEvents;
+    $('home-stat-ideas').textContent = ideas.length;
+
+    // Mini calendario
+    renderMiniCal();
+    renderHomeAgenda();
+  }
+
+  function renderMiniCal(){
+    const y = homeDate.getFullYear();
+    const m = homeDate.getMonth();
+    $('mc-title').textContent = new Date(y, m, 1).toLocaleDateString('es', { month: 'long', year: 'numeric' });
+
+    const eventos = safeLocalGet('alegc_eventos_v2', {});
+    const todayKey = todayStr();
+
+    const first = new Date(y, m, 1);
+    let startDow = first.getDay();
+    if (startDow === 0) startDow = 7;
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const prevMonthDays = new Date(y, m, 0).getDate();
+
+    let html = '';
+    ['L','M','M','J','V','S','D'].forEach(d => {
+      html += '<div class="mini-cal-dow">' + d + '</div>';
+    });
+
+    for (let i = startDow - 1; i > 0; i--){
+      html += '<div class="mini-cal-day other">' + (prevMonthDays - i + 1) + '</div>';
+    }
+    for (let d = 1; d <= daysInMonth; d++){
+      const key = dateKey(y, m, d);
+      const classes = ['mini-cal-day'];
+      if (key === todayKey) classes.push('today');
+      if (eventos[key] && eventos[key].length) classes.push('has-events');
+      html += '<div class="' + classes.join(' ') + '" data-key="' + key + '">' + d + '</div>';
+    }
+    const totalCells = startDow - 1 + daysInMonth;
+    const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let i = 1; i <= remaining; i++){
+      html += '<div class="mini-cal-day other">' + i + '</div>';
+    }
+    $('mc-grid').innerHTML = html;
+    $('mc-grid').querySelectorAll('.mini-cal-day[data-key]').forEach(el => {
+      el.addEventListener('click', () => {
+        goTo('calendario');
+        selectedDate = el.dataset.key;
+        calDate = new Date(el.dataset.key + 'T12:00:00');
+        renderCalendario();
+      });
+    });
+  }
+
+  function renderHomeAgenda(){
+    const key = todayStr();
+    const eventos = safeLocalGet('alegc_eventos_v2', {});
+    const list = eventos[key] || [];
+    const wrap = $('home-agenda');
+    if (!list.length){
+      wrap.innerHTML = '<li class="agenda-empty">Sin eventos para hoy.</li>';
+      return;
+    }
+    wrap.innerHTML = list.map(ev => {
+      const time = ev.time || '';
+      const text = ev.text || ev;
+      return '<li class="agenda-item">' +
+        (time ? '<span class="agenda-time">' + escapeHtml(time) + '</span>' : '') +
+        '<span>' + escapeHtml(text) + '</span>' +
+      '</li>';
+    }).join('');
+  }
+
+  $('mc-prev').addEventListener('click', () => { homeDate.setMonth(homeDate.getMonth() - 1); renderMiniCal(); });
+  $('mc-next').addEventListener('click', () => { homeDate.setMonth(homeDate.getMonth() + 1); renderMiniCal(); });
+
+  document.querySelectorAll('[data-quick]').forEach(el => {
+    el.addEventListener('click', () => goTo(el.dataset.quick === 'ia' ? 'ia' : el.dataset.quick));
+  });
+
+  // ==================== DIARIO ====================
+  const DIARIO_KEY = 'alegc_diario_v2';
+  let currentMood = '';
+
+  function renderDiario(){
+    const list = safeLocalGet(DIARIO_KEY, []);
+    const wrap = $('entries-list');
+    if (!list.length){
+      wrap.innerHTML = '<p class="empty-note">Aún no has escrito nada. ¡Empieza hoy!</p>';
+      return;
+    }
+    wrap.innerHTML = list.slice().reverse().map((entry, idx) => {
+      const i = list.length - 1 - idx;
+      return '<div class="entry-card" data-i="' + i + '">' +
+        '<div class="entry-head">' +
+          '<span>' + escapeHtml(fmtDateTime(entry.date)) + '</span>' +
+          '<div style="display:flex; gap:8px; align-items:center;">' +
+            (entry.mood ? '<span class="entry-mood">' + escapeHtml(entry.mood) + '</span>' : '') +
+            '<div class="entry-actions">' +
+              '<button data-action="delete" data-i="' + i + '" title="Eliminar">🗑️</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="entry-text">' + escapeHtml(entry.text) + '</div>' +
+      '</div>';
+    }).join('');
+
+    wrap.querySelectorAll('[data-action="delete"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const arr = safeLocalGet(DIARIO_KEY, []);
+        arr.splice(parseInt(btn.dataset.i, 10), 1);
+        safeLocalSet(DIARIO_KEY, arr);
+        renderDiario();
+        showToast('Entrada eliminada');
+      });
+    });
+  }
+
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      if (currentMood === btn.dataset.mood){
+        currentMood = '';
+      } else {
+        currentMood = btn.dataset.mood;
+        btn.classList.add('selected');
+      }
+    });
+  });
+
+  $('diario-input').addEventListener('input', (e) => {
+    $('diario-count').textContent = e.target.value.length + ' caracteres';
+  });
+
+  $('diario-save').addEventListener('click', () => {
+    const text = $('diario-input').value.trim();
+    if (!text){ showToast('Escribe algo primero'); return; }
+    const arr = safeLocalGet(DIARIO_KEY, []);
+    arr.push({ text, mood: currentMood, date: new Date().toISOString() });
+    if (safeLocalSet(DIARIO_KEY, arr)){
+      $('diario-input').value = '';
+      $('diario-count').textContent = '0 caracteres';
+      currentMood = '';
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      renderDiario();
+      showToast('Entrada guardada ✅');
+    }
+  });
+
+  // ==================== CALENDARIO ====================
+  const EVENTOS_KEY = 'alegc_eventos_v2';
+  let calDate = new Date();
+  let selectedDate = todayStr();
+
+  function renderCalendario(){
+    const y = calDate.getFullYear();
+    const m = calDate.getMonth();
+    $('cal-title').textContent = new Date(y, m, 1).toLocaleDateString('es', { month: 'long', year: 'numeric' });
+
+    const eventos = safeLocalGet(EVENTOS_KEY, {});
+    const todayKey = todayStr();
+
+    const first = new Date(y, m, 1);
+    let startDow = first.getDay();
+    if (startDow === 0) startDow = 7;
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const prevMonthDays = new Date(y, m, 0).getDate();
+
+    let html = '';
+    ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d => {
+      html += '<div class="cal-dow">' + d + '</div>';
+    });
+    for (let i = startDow - 1; i > 0; i--){
+      html += '<div class="cal-day other"><div class="cal-day-num">' + (prevMonthDays - i + 1) + '</div></div>';
+    }
+    for (let d = 1; d <= daysInMonth; d++){
+      const key = dateKey(y, m, d);
+      const evs = eventos[key] || [];
+      const cls = ['cal-day'];
+      if (key === todayKey) cls.push('today');
+      if (key === selectedDate) cls.push('selected');
+      let eventsHtml = '';
+      evs.slice(0, 2).forEach(ev => {
+        eventsHtml += '<div class="cal-day-event">' + escapeHtml(ev.text || ev) + '</div>';
+      });
+      if (evs.length > 2) eventsHtml += '<div class="cal-day-event">+' + (evs.length - 2) + ' más</div>';
+      html += '<div class="' + cls.join(' ') + '" data-key="' + key + '">' +
+        '<div class="cal-day-num">' + d + '</div>' + eventsHtml + '</div>';
+    }
+    const totalCells = startDow - 1 + daysInMonth;
+    const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let i = 1; i <= remaining; i++){
+      html += '<div class="cal-day other"><div class="cal-day-num">' + i + '</div></div>';
+    }
+    $('cal-grid').innerHTML = html;
+    $('cal-grid').querySelectorAll('.cal-day[data-key]').forEach(el => {
+      el.addEventListener('click', () => {
+        selectedDate = el.dataset.key;
+        renderCalendario();
+        renderEventos();
+      });
+    });
+    renderEventos();
+  }
+
+  function renderEventos(){
+    const eventos = safeLocalGet(EVENTOS_KEY, {});
+    const list = eventos[selectedDate] || [];
+    const d = new Date(selectedDate + 'T12:00:00');
+    $('events-date').textContent = fmtDate(d.toISOString());
+    const wrap = $('events-list');
+    if (!list.length){
+      wrap.innerHTML = '<p class="empty-note">Ningún evento este día.</p>';
+      return;
+    }
+    wrap.innerHTML = list.map((ev, i) => {
+      const text = ev.text || ev;
+      const time = ev.time || '';
+      return '<div class="event-item">' +
+        '<div>' +
+          (time ? '<div class="event-time">' + escapeHtml(time) + '</div>' : '') +
+          '<div class="event-text">' + escapeHtml(text) + '</div>' +
+        '</div>' +
+        '<button data-i="' + i + '" title="Eliminar">✕</button>' +
+      '</div>';
+    }).join('');
+    wrap.querySelectorAll('button[data-i]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const arr = safeLocalGet(EVENTOS_KEY, {});
+        if (arr[selectedDate]){
+          arr[selectedDate].splice(parseInt(btn.dataset.i, 10), 1);
+          if (!arr[selectedDate].length) delete arr[selectedDate];
+          safeLocalSet(EVENTOS_KEY, arr);
+          renderCalendario();
+          renderEventos();
+          showToast('Evento eliminado');
+        }
+      });
+    });
+  }
+
+  $('cal-prev').addEventListener('click', () => { calDate.setMonth(calDate.getMonth() - 1); renderCalendario(); });
+  $('cal-next').addEventListener('click', () => { calDate.setMonth(calDate.getMonth() + 1); renderCalendario(); });
+  $('cal-today').addEventListener('click', () => { calDate = new Date(); selectedDate = todayStr(); renderCalendario(); });
+
+  $('event-add').addEventListener('click', () => {
+    const text = $('event-input').value.trim();
+    if (!text){ showToast('Escribe algo primero'); return; }
+    const now = new Date();
+    const time = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    const arr = safeLocalGet(EVENTOS_KEY, {});
+    if (!arr[selectedDate]) arr[selectedDate] = [];
+    arr[selectedDate].push({ text, time });
+    if (safeLocalSet(EVENTOS_KEY, arr)){
+      $('event-input').value = '';
+      renderCalendario();
+      renderEventos();
+      showToast('Evento agregado 📅');
+    }
+  });
+
+  $('event-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('event-add').click();
+  });
+
+  // ==================== INSTAGRAM ====================
+  const IG_KEY = 'alegc_instagram_v2';
+  let igState = safeLocalGet(IG_KEY, { followers: null, following: null, notFollowingBack: [], reviewed: {} });
+
+  function renderStats(){
+    $('stat-followers').textContent = igState.followers != null ? Number(igState.followers).toLocaleString('es') : '—';
+    $('stat-following').textContent = igState.following != null ? Number(igState.following).toLocaleString('es') : '—';
+    $('stat-notback').textContent = (igState.notFollowingBack || []).length || '—';
+    if (igState.followers != null) $('input-followers').value = igState.followers;
+    if (igState.following != null) $('input-following').value = igState.following;
     renderNotBackTable();
   }
 
-  async function saveState(){
-    localSave();
-    if (db) {
-      try { await db.doc('alegc/instagram').set(state); } catch(e){}
-    }
-  }
+  function saveIg(){ safeLocalSet(IG_KEY, igState); }
 
-  // ---------- Resumen tab ----------
-  document.getElementById('save-stats').addEventListener('click', function(){
-    const f = parseInt(document.getElementById('input-followers').value, 10);
-    const g = parseInt(document.getElementById('input-following').value, 10);
-    if (!isNaN(f)) state.followers = f;
-    if (!isNaN(g)) state.following = g;
-    saveState();
+  $('save-stats').addEventListener('click', () => {
+    const f = parseInt($('input-followers').value, 10);
+    const g = parseInt($('input-following').value, 10);
+    if (!isNaN(f)) igState.followers = f;
+    if (!isNaN(g)) igState.following = g;
+    saveIg();
     renderStats();
+    showToast('Números guardados');
   });
 
-  function renderStats(){
-    document.getElementById('stat-followers').textContent = state.followers != null ? state.followers.toLocaleString('es') : '—';
-    document.getElementById('stat-following').textContent = state.following != null ? state.following.toLocaleString('es') : '—';
-    document.getElementById('stat-notback').textContent = (state.notFollowingBack && state.notFollowingBack.length) ? state.notFollowingBack.length.toLocaleString('es') : '—';
-    if (state.followers != null) document.getElementById('input-followers').value = state.followers;
-    if (state.following != null) document.getElementById('input-following').value = state.following;
-  }
-
-  // ---------- Seguidores: parsing Instagram export ----------
-  let followersSet = null, followingSet = null;
-
   function extractUsernames(json){
-    // Instagram export formats vary; recursively find every string_list_data[].value
     const out = new Set();
     function walk(node){
       if (!node) return;
-      if (Array.isArray(node)) { node.forEach(walk); return; }
-      if (typeof node === 'object') {
-        if (Array.isArray(node.string_list_data)) {
-          node.string_list_data.forEach(function(item){
-            if (item && item.value) out.add(item.value);
+      if (Array.isArray(node)){ node.forEach(walk); return; }
+      if (typeof node === 'object'){
+        if (Array.isArray(node.string_list_data)){
+          node.string_list_data.forEach(item => {
+            if (item && typeof item.value === 'string' && item.value) out.add(item.value);
           });
         }
         Object.values(node).forEach(walk);
@@ -737,453 +1396,439 @@
     return out;
   }
 
-  function handleFile(inputEl, fnEl, onParsed){
-    inputEl.addEventListener('change', function(){
+  let followersSet = null, followingSet = null;
+
+  function computeNotBack(){
+    if (!followersSet || !followingSet) return;
+    const notBack = [];
+    followingSet.forEach(u => { if (!followersSet.has(u)) notBack.push(u); });
+    notBack.sort((a,b) => a.localeCompare(b));
+    igState.notFollowingBack = notBack;
+    igState.followers = followersSet.size;
+    igState.following = followingSet.size;
+    saveIg();
+    renderStats();
+  }
+
+  function handleIgFile(inputEl, fnEl, onParsed){
+    inputEl.addEventListener('change', () => {
       const file = inputEl.files[0];
       if (!file) return;
+      if (file.size > 50 * 1024 * 1024){ fnEl.textContent = 'Archivo demasiado grande'; return; }
       fnEl.textContent = file.name;
       const reader = new FileReader();
-      reader.onload = function(e){
+      reader.onload = (e) => {
         try {
           const json = JSON.parse(e.target.result);
           const usernames = extractUsernames(json);
           onParsed(usernames);
         } catch(err){
-          fnEl.textContent = file.name + ' — no se pudo leer el JSON';
+          fnEl.textContent = file.name + ' — no se pudo leer';
         }
       };
       reader.readAsText(file);
     });
   }
 
-  function computeNotBack(){
-    if (!followersSet || !followingSet) return;
-    const notBack = [];
-    followingSet.forEach(function(u){ if (!followersSet.has(u)) notBack.push(u); });
-    notBack.sort((a,b)=>a.localeCompare(b));
-    state.notFollowingBack = notBack;
-    state.followers = followersSet.size;
-    state.following = followingSet.size;
-    saveState();
-    renderStats();
-    renderNotBackTable();
-  }
-
-  handleFile(document.getElementById('file-followers'), document.getElementById('fn-followers'), function(set){
-    followersSet = set; computeNotBack();
-  });
-  handleFile(document.getElementById('file-following'), document.getElementById('fn-following'), function(set){
-    followingSet = set; computeNotBack();
-  });
+  handleIgFile($('file-followers'), $('fn-followers'), s => { followersSet = s; computeNotBack(); });
+  handleIgFile($('file-following'), $('fn-following'), s => { followingSet = s; computeNotBack(); });
 
   function renderNotBackTable(){
-    const body = document.getElementById('notback-body');
-    const list = state.notFollowingBack || [];
-    const countEl = document.getElementById('notback-count');
-    if (!list.length) {
-      body.innerHTML = '<tr><td colspan="3" style="color:var(--text-soft); text-align:center; padding:30px;">Sube ambos archivos para calcular tu lista.</td></tr>';
-      countEl.textContent = 'Sube ambos archivos para ver tu lista';
+    const body = $('notback-body');
+    const list = igState.notFollowingBack || [];
+    const countEl = $('notback-count');
+    if (!list.length){
+      body.innerHTML = '<tr><td colspan="3" style="color:var(--text-soft); text-align:center; padding:30px;">Sube ambos archivos para ver tu lista.</td></tr>';
+      countEl.textContent = 'Sube ambos archivos';
       return;
     }
-    countEl.textContent = list.length + ' cuentas no te siguen de vuelta';
-    body.innerHTML = list.map(function(u){
-      const checked = state.reviewed[u] ? 'checked' : '';
-      const safeU = escapeHtml(u);
+    countEl.textContent = list.length + ' cuentas no te siguen';
+    body.innerHTML = list.map(u => {
+      const safeU = escapeAttr(u);
+      const safeText = escapeHtml(u);
+      const checked = igState.reviewed[u] ? 'checked' : '';
       return '<tr>' +
         '<td><input type="checkbox" class="pick-row" data-u="' + safeU + '"></td>' +
-        '<td><a class="username-link" href="https://instagram.com/' + encodeURIComponent(u) + '" target="_blank" rel="noopener">@' + safeU + '</a></td>' +
+        '<td><a class="username-link" href="https://instagram.com/' + encodeURIComponent(u) + '" target="_blank" rel="noopener noreferrer">@' + safeText + '</a></td>' +
         '<td><input type="checkbox" class="mark-reviewed" data-u="' + safeU + '" ' + checked + '></td>' +
-        '</tr>';
+      '</tr>';
     }).join('');
-    body.querySelectorAll('.mark-reviewed').forEach(function(cb){
-      cb.addEventListener('change', function(){
-        state.reviewed[cb.dataset.u] = cb.checked;
-        saveState();
+    body.querySelectorAll('.mark-reviewed').forEach(cb => {
+      cb.addEventListener('change', () => {
+        igState.reviewed[cb.dataset.u] = cb.checked;
+        saveIg();
       });
     });
   }
 
-  document.getElementById('select-all').addEventListener('click', function(){
-    document.querySelectorAll('.pick-row').forEach(function(cb){ cb.checked = true; });
+  $('select-all').addEventListener('click', () => {
+    document.querySelectorAll('.pick-row').forEach(cb => cb.checked = true);
   });
 
-  document.getElementById('export-csv').addEventListener('click', async function(){
-    const picked = Array.from(document.querySelectorAll('.pick-row:checked')).map(cb=>cb.dataset.u);
-    if (!picked.length) { alert('Selecciona al menos una cuenta.'); return; }
-    const csv = 'usuario\n' + picked.map(u=>'@'+u).join('\n');
-    if (downloads) {
-      try {
-        await downloads.save({ filename: 'dejar-de-seguir.csv', data: csv });
-        return;
-      } catch(e){}
-    }
-    // fallback: open as data URI
-    const blob = new Blob([csv], {type:'text/csv'});
+  $('export-csv').addEventListener('click', () => {
+    const picked = Array.from(document.querySelectorAll('.pick-row:checked')).map(cb => cb.dataset.u);
+    if (!picked.length){ showToast('Selecciona al menos una cuenta'); return; }
+    const csv = 'usuario\n' + picked.map(u => '@' + u).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'dejar-de-seguir.csv'; a.click();
+    a.href = url;
+    a.download = 'dejar-de-seguir.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
-  // ---------- Shared: never trust AI-generated (or uploaded) text as HTML ----------
-  function escapeHtml(str){
-    return String(str == null ? '' : str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  // ---------- Sample (AI) helpers ----------
-  async function runSample(outEl, prompt){
-    if (!sampler) {
-      outEl.classList.remove('empty');
-      outEl.textContent = 'Esta función de IA no está disponible en esta vista todavía.';
+  // Instagram IA
+  function setAiOut(el, text, loading){
+    if (loading){
+      el.style.fontStyle = 'italic';
+      el.style.color = 'var(--text-soft)';
+      el.textContent = 'Pensando...';
       return;
     }
-    outEl.classList.remove('empty');
-    outEl.innerHTML = 'Pensando<span class="loading-dots"></span>';
-    const t = makeTimeoutSignal(30000);
-    try {
-      const res = await sampler(prompt, {
-        modelTier: 'default',
-        signal: t.signal,
-        onText: function(chunk){ outEl.textContent = chunk.text; }
-      });
-      outEl.textContent = res.text;
-    } catch(err){
-      outEl.textContent = sampleErrorText(err).text;
-    } finally {
-      t.clear();
-    }
+    el.style.fontStyle = 'normal';
+    el.style.color = 'var(--text)';
+    el.textContent = text;
   }
 
-  document.getElementById('run-potencial').addEventListener('click', function(){
-    const niche = document.getElementById('pot-niche').value.trim() || 'sin especificar';
-    const freq = document.getElementById('pot-freq').value;
-    const goal = document.getElementById('pot-goal').value.trim() || 'sin especificar';
-    const followers = state.followers != null ? state.followers : 'no especificado';
-    const following = state.following != null ? state.following : 'no especificado';
-    const prompt = 'Eres un consultor de crecimiento en Instagram, directo y práctico, sin relleno. ' +
-      'Un usuario te da estos datos de su cuenta:\n' +
-      '- Nicho/tema: ' + niche + '\n' +
-      '- Frecuencia de publicación: ' + freq + '\n' +
-      '- Seguidores actuales: ' + followers + '\n' +
-      '- Cuentas que sigue: ' + following + '\n' +
-      '- Objetivo con su Instagram: ' + goal + '\n\n' +
-      'Escribe en español, tono cercano pero profesional, sin emojis excesivos. Da: ' +
-      '1) un diagnóstico honesto de su potencial actual en 2-3 frases, ' +
-      '2) 3 cosas concretas que debería mejorar en su perfil o estrategia, con acciones específicas (no genéricas), ' +
-      '3) una sugerencia de cómo posicionarse frente a su nicho. Máximo 220 palabras.';
-    runSample(document.getElementById('out-potencial'), prompt);
+  $('run-potencial').addEventListener('click', async () => {
+    const niche = $('pot-niche').value.trim() || 'sin especificar';
+    const freq = $('pot-freq').value;
+    const goal = $('pot-goal').value.trim() || 'sin especificar';
+    const followers = igState.followers != null ? igState.followers : 'no especificado';
+    const following = igState.following != null ? igState.following : 'no especificado';
+    const prompt = 'Eres un consultor de crecimiento en Instagram, directo y práctico, sin relleno. Datos del usuario:\n' +
+      '- Nicho: ' + niche + '\n- Frecuencia de publicación: ' + freq + '\n' +
+      '- Seguidores actuales: ' + followers + '\n- Cuentas que sigue: ' + following + '\n' +
+      '- Objetivo: ' + goal + '\n\n' +
+      'Escribe en español, tono cercano pero profesional. Da: 1) diagnóstico honesto en 2-3 frases. ' +
+      '2) 3 mejoras concretas con acciones específicas. 3) Una sugerencia de posicionamiento. Máximo 220 palabras.';
+    const out = $('out-potencial');
+    setAiOut(out, '', true);
+    try {
+      const text = await callAI({ prompt, maxTokens: 800 });
+      setAiOut(out, text);
+    } catch(e){
+      setAiOut(out, '⚠️ ' + e.message);
+    }
   });
 
-  document.getElementById('run-contenido').addEventListener('click', function(){
-    const niche = document.getElementById('cont-niche').value.trim() || document.getElementById('pot-niche').value.trim() || 'sin especificar';
-    const diff = document.getElementById('cont-diff').value.trim() || 'sin especificar';
-    const prompt = 'Eres un estratega de contenido para Instagram. Un usuario tiene este nicho: "' + niche + '" ' +
-      'y esto lo distingue: "' + diff + '". ' +
-      'Dale en español 6 ideas de contenido concretas y accionables (mezcla de Reels y carruseles), cada una en una línea con formato "- [tipo de formato] Idea: por qué funciona". ' +
-      'Prioriza ideas de bajo costo de producción, específicas a su nicho real, no genéricas. No agregues introducción ni cierre, solo la lista.';
-    runSample(document.getElementById('out-contenido'), prompt);
+  $('run-contenido').addEventListener('click', async () => {
+    const niche = $('cont-niche').value.trim() || $('pot-niche').value.trim() || 'sin especificar';
+    const diff = $('cont-diff').value.trim() || 'sin especificar';
+    const prompt = 'Eres un estratega de contenido para Instagram. Nicho: "' + niche + '". Diferenciador: "' + diff + '". ' +
+      'Da en español 6 ideas de contenido concretas (mezcla Reels y carruseles), cada una en una línea con formato "- [formato] Idea: por qué funciona". ' +
+      'Prioriza bajo costo de producción y especificidad al nicho. Solo la lista, sin introducción ni cierre.';
+    const out = $('out-contenido');
+    setAiOut(out, '', true);
+    try {
+      const text = await callAI({ prompt, maxTokens: 900 });
+      setAiOut(out, text);
+    } catch(e){
+      setAiOut(out, '⚠️ ' + e.message);
+    }
   });
 
-  // ---------- Productividad > IA ----------
-  const IA_LS_KEY = 'alegc_ia_state_v1';
-  let iaState = { ideas: [], savedForLater: [], hasGenerated: false };
+  // ==================== IDEAS IA ====================
+  const IA_KEY = 'alegc_ia_v2';
+  const IA_SAVED_KEY = 'alegc_ia_saved_v2';
+  let iaState = safeLocalGet(IA_KEY, { ideas: [] });
+  let iaSaved = safeLocalGet(IA_SAVED_KEY, []);
   let iaLoaded = false;
-  let iaGenerating = false;
+  let iaBusy = false;
 
-  function iaLocalSave(){ try { localStorage.setItem(IA_LS_KEY, JSON.stringify(iaState)); } catch(e){} }
-  function iaLocalLoad(){
-    try { const raw = localStorage.getItem(IA_LS_KEY); if (raw) iaState = Object.assign(iaState, JSON.parse(raw)); } catch(e){}
-  }
-  async function iaSaveState(){
-    iaLocalSave();
-    if (db) { try { await db.doc('alegc/ia').set(iaState); } catch(e){} }
-  }
-  async function iaLoadState(){
-    iaLocalLoad();
-    if (db) {
-      try { const doc = await db.doc('alegc/ia').get(); if (doc && doc.exists) iaState = Object.assign(iaState, doc.data()); } catch(e){}
-    }
+  function saveIa(){ safeLocalSet(IA_KEY, iaState); }
+  function saveIaSaved(){ safeLocalSet(IA_SAVED_KEY, iaSaved); }
+
+  function renderIaBadge(){
+    $('saved-count-badge').textContent = iaSaved.length;
   }
 
-  function fmtDateTime(iso){
-    try {
-      return new Date(iso).toLocaleString('es', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-    } catch(e){ return ''; }
-  }
-
-  const CATEGORY_ORDER = ['General','App','Página','Música','YouTube','Proyecto'];
-
-  // ---------- Sub-tabs (existentes / originales / guardadas) ----------
-  document.querySelectorAll('#ia-tabs .seg-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      document.querySelectorAll('#ia-tabs .seg-tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('#view-ia .seg-panel').forEach(p=>p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('iapanel-' + tab.dataset.iatab).classList.add('active');
-      document.getElementById('ia-ideas-toolbar').style.display = (tab.dataset.iatab === 'guardadas') ? 'none' : 'flex';
-    });
-  });
-
-  // ---------- Sub-tabs (Aprendizaje: recomendados / guardados) ----------
-  document.querySelectorAll('#ap-tabs .seg-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      document.querySelectorAll('#ap-tabs .seg-tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('#view-aprendizaje .seg-panel').forEach(p=>p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('appanel-' + tab.dataset.aptab).classList.add('active');
-      document.getElementById('ap-toolbar').style.display = (tab.dataset.aptab === 'guardados') ? 'none' : 'flex';
-    });
-  });
+  const IA_CATS = ['App', 'Página', 'Música', 'YouTube', 'Proyecto', 'General'];
 
   function ideaCardHtml(idea){
     const typeTag = idea.type === 'original'
       ? '<span class="tag-original">Crear desde cero</span>'
       : '<span class="tag-existente">Ya existe</span>';
-    return '<div class="idea-card type-' + (idea.type || 'existente') + '" data-id="' + idea.id + '">' +
+    return '<div class="idea-card type-' + (idea.type === 'original' ? 'original' : 'existente') + '">' +
       '<div class="idea-top">' +
-        '<div>' + typeTag + '<h4>' + escapeHtml(idea.title) + '</h4><p class="idea-desc">' + escapeHtml(idea.desc) + '</p></div>' +
+        '<div>' + typeTag +
+          '<h4>' + escapeHtml(idea.title) + '</h4>' +
+          '<p class="idea-desc">' + escapeHtml(idea.desc) + '</p>' +
+        '</div>' +
         '<div class="idea-actions">' +
-          '<button class="icon-btn flag-btn" title="Guardar para más tarde" data-id="' + idea.id + '">🚩</button>' +
-          '<button class="icon-btn trash-btn" title="Descartar" data-id="' + idea.id + '">🗑️</button>' +
+          '<button class="icon-btn flag-btn" data-id="' + escapeAttr(idea.id) + '" title="Guardar">🚩</button>' +
+          '<button class="icon-btn trash-btn" data-id="' + escapeAttr(idea.id) + '" title="Descartar">🗑️</button>' +
         '</div>' +
       '</div>' +
-      '<div class="idea-meta">Generado: ' + fmtDateTime(idea.generatedAt) + '</div>' +
     '</div>';
   }
 
   function renderIdeaGroup(containerId, list){
-    const wrap = document.getElementById(containerId);
-    if (!list.length) {
-      wrap.innerHTML = '<p class="empty-note">No hay ideas activas en esta sección. Presiona "Reiniciar ideas" para generar nuevas.</p>';
+    const wrap = $(containerId);
+    if (!list.length){
+      wrap.innerHTML = '<p class="empty-note">No hay ideas activas. Genera nuevas.</p>';
       return;
     }
     const groups = {};
-    list.forEach(function(idea){
+    list.forEach(idea => {
       const cat = idea.category || 'General';
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(idea);
     });
-    const orderedCats = Object.keys(groups).sort(function(a,b){
-      const ai = CATEGORY_ORDER.indexOf(a), bi = CATEGORY_ORDER.indexOf(b);
+    const cats = Object.keys(groups).sort((a,b) => {
+      const ai = IA_CATS.indexOf(a), bi = IA_CATS.indexOf(b);
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     });
     let html = '';
-    orderedCats.forEach(function(cat){
+    cats.forEach(cat => {
       html += '<div class="category-heading">' + escapeHtml(cat) + '</div>';
-      groups[cat].forEach(function(idea){ html += ideaCardHtml(idea); });
+      groups[cat].forEach(i => html += ideaCardHtml(i));
     });
     wrap.innerHTML = html;
-    wrap.querySelectorAll('.flag-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ flagIdea(btn.dataset.id); });
+    wrap.querySelectorAll('.flag-btn').forEach(btn => {
+      btn.addEventListener('click', () => flagIdea(btn.dataset.id));
     });
-    wrap.querySelectorAll('.trash-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ trashIdea(btn.dataset.id); });
+    wrap.querySelectorAll('.trash-btn').forEach(btn => {
+      btn.addEventListener('click', () => trashIdea(btn.dataset.id));
     });
   }
 
   function renderAllIdeas(){
-    const existentes = iaState.ideas.filter(i=>i.type === 'existente');
-    const originales = iaState.ideas.filter(i=>i.type === 'original');
-    renderIdeaGroup('ia-groups-existentes', existentes);
-    renderIdeaGroup('ia-groups-originales', originales);
-    document.getElementById('ia-meta').textContent =
-      existentes.length + ' con herramientas existentes · ' + originales.length + ' para crear desde cero';
+    const ex = iaState.ideas.filter(i => i.type === 'existente');
+    const or = iaState.ideas.filter(i => i.type === 'original');
+    renderIdeaGroup('ia-groups-existentes', ex);
+    renderIdeaGroup('ia-groups-originales', or);
+    $('ia-meta').textContent = ex.length + ' existentes · ' + or.length + ' originales';
   }
 
   function flagIdea(id){
-    const idx = iaState.ideas.findIndex(i=>i.id === id);
+    const idx = iaState.ideas.findIndex(i => i.id === id);
     if (idx === -1) return;
     const idea = iaState.ideas.splice(idx, 1)[0];
-    iaState.savedForLater.unshift(idea);
-    iaSaveState();
-    renderAllIdeas();
-    renderSaved();
+    iaSaved.unshift(idea);
+    saveIa(); saveIaSaved();
+    renderAllIdeas(); renderSaved(); renderIaBadge();
+    showToast('Guardada para más tarde');
   }
-
   function trashIdea(id){
-    iaState.ideas = iaState.ideas.filter(i=>i.id !== id);
-    iaSaveState();
+    iaState.ideas = iaState.ideas.filter(i => i.id !== id);
+    saveIa();
     renderAllIdeas();
   }
 
   function renderSaved(){
-    const wrap = document.getElementById('ia-saved-list');
-    const badge = document.getElementById('saved-count-badge');
-    badge.textContent = iaState.savedForLater.length;
-    if (!iaState.savedForLater.length) {
+    const wrap = $('ia-saved-list');
+    if (!iaSaved.length){
       wrap.innerHTML = '<p class="empty-note">Aún no has guardado ninguna idea.</p>';
       return;
     }
-    wrap.innerHTML = iaState.savedForLater.map(function(idea){
+    wrap.innerHTML = iaSaved.map(idea => {
       const typeTag = idea.type === 'original'
         ? '<span class="tag-original">Crear desde cero</span>'
         : '<span class="tag-existente">Ya existe</span>';
-      return '<div class="saved-item" data-type="' + (idea.type || 'existente') + '">' +
-        '<div>' + typeTag + '<span class="badge">' + escapeHtml(idea.category||'General') + '</span>' +
+      return '<div class="saved-item" data-type="' + (idea.type === 'original' ? 'original' : 'existente') + '">' +
+        '<div>' + typeTag + '<span class="badge">' + escapeHtml(idea.category || 'General') + '</span>' +
         '<h4>' + escapeHtml(idea.title) + '</h4>' +
         '<p>' + escapeHtml(idea.desc) + '</p></div>' +
-        '<button class="icon-btn remove-saved-btn" title="Quitar de guardados" data-id="' + idea.id + '">🗑️</button>' +
+        '<button class="icon-btn remove-saved" data-id="' + escapeAttr(idea.id) + '" title="Quitar">🗑️</button>' +
       '</div>';
     }).join('');
-    wrap.querySelectorAll('.remove-saved-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        iaState.savedForLater = iaState.savedForLater.filter(i=>i.id !== btn.dataset.id);
-        iaSaveState();
+    wrap.querySelectorAll('.remove-saved').forEach(btn => {
+      btn.addEventListener('click', () => {
+        iaSaved = iaSaved.filter(i => i.id !== btn.dataset.id);
+        saveIaSaved();
         renderSaved();
+        renderIaBadge();
       });
     });
   }
 
-  function setLoadingUI(msg){
-    document.getElementById('ia-groups-existentes').innerHTML = '<p class="empty-note">' + msg + '<span class="loading-dots"></span></p>';
-    document.getElementById('ia-groups-originales').innerHTML = '<p class="empty-note">' + msg + '<span class="loading-dots"></span></p>';
-    document.getElementById('ia-meta').textContent = 'Generando…';
-  }
-
-  function setResetButtonState(disabled, label){
-    const btn = document.getElementById('ia-reset');
-    btn.disabled = disabled;
-    btn.textContent = label;
-  }
-
-  // ---------- Shared: turn a sample() rejection into viewer copy ----------
-  function sampleErrorText(err){
-    const code = err && err.code;
-    const hideCodes = ['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
-    if (hideCodes.indexOf(code) !== -1) return { hide: true, text: 'La generación con IA no está disponible en esta vista.' };
-    if (code === 'rate_limited') return { hide: false, text: 'Hay demasiadas solicitudes ahora mismo. Espera un momento y vuelve a intentar.' };
-    if (code === 'cancelled') return { hide: false, text: 'Se tardó demasiado en responder. Intenta de nuevo.' };
-    if (code === 'invalid_json' || code === 'invalid_request' || code === 'prompt_too_large') return { hide: false, text: 'Hubo un problema con el formato de la respuesta.' };
-    if (code === 'refused') return { hide: false, text: 'No se pudo generar esa respuesta.' };
-    return { hide: false, text: 'No se pudo generar ahora mismo.' };
-  }
-
-  // ---------- Shared: never let a sample() call hang forever ----------
-  function makeTimeoutSignal(ms){
-    const controller = new AbortController();
-    const timer = setTimeout(function(){ controller.abort(); }, ms);
-    return { signal: controller.signal, clear: function(){ clearTimeout(timer); } };
-  }
-
-  const IA_PROMPT = 'Genera exactamente 12 ideas de cosas relacionadas con inteligencia artificial para que una persona curiosa las pruebe o construya. ' +
-    'Divide las 12 en dos tipos EXACTOS, 6 de cada uno: ' +
-    '"existente" = una herramienta, app, página o género/técnica musical que YA EXISTE hoy y la persona puede abrir y usar ahora mismo (nombra la herramienta o el tipo de herramienta real); ' +
-    '"original" = un concepto que NO existe todavía tal cual, algo original que se podría diseñar y construir desde cero (una app, página, proyecto, pieza musical o formato de video nuevo, pensado para resolver algo real o ser genuinamente innovador). ' +
-    'Cada idea también lleva una categoría: "App", "Página", "Música", "YouTube" o "Proyecto" (usa "General" solo si de verdad no encaja en ninguna). ' +
-    'Reparte las categorías con variedad, no repitas la misma categoría en todas. Sé específico y accionable, nunca genérico ni vago. Varía tus respuestas cada vez que te pidan esto, no repitas siempre las mismas ideas. Responde en español. ' +
-    'Responde SOLO con un array JSON, sin texto antes ni después, con este formato exacto: ' +
-    '[{"type":"existente|original","category":"App|Página|Música|YouTube|Proyecto|General","title":"string corto","desc":"1-2 frases explicando qué es y por qué vale la pena"}]';
+  const IA_PROMPT = 'Genera exactamente 12 ideas sobre inteligencia artificial para una persona curiosa. ' +
+    'Divide en dos tipos EXACTOS, 6 de cada uno: ' +
+    '"existente" = herramienta, app, página o técnica musical que YA EXISTE hoy y se puede usar ahora (nombra la herramienta real); ' +
+    '"original" = concepto que NO existe todavía, algo innovador que se podría diseñar y construir desde cero. ' +
+    'Cada idea lleva una categoría: "App", "Página", "Música", "YouTube" o "Proyecto" (usa "General" solo si no encaja). ' +
+    'Sé específico, accionable, variado. Responde en español. ' +
+    'Responde SOLO con un objeto JSON con esta forma exacta: ' +
+    '{"ideas":[{"type":"existente|original","category":"App|Página|Música|YouTube|Proyecto|General","title":"string corto","desc":"1-2 frases"}]}';
 
   async function generateIdeas(){
-    if (iaGenerating) return;
-    if (!sampler) {
-      document.getElementById('ia-groups-existentes').innerHTML = '<p class="empty-note">La generación de ideas con IA no está disponible en esta vista.</p>';
-      document.getElementById('ia-groups-originales').innerHTML = '<p class="empty-note">La generación de ideas con IA no está disponible en esta vista.</p>';
-      return;
-    }
-    iaGenerating = true;
-    setResetButtonState(true, 'Generando…');
-    setLoadingUI('Generando ideas');
-
-    let result = null;
-    const t = makeTimeoutSignal(30000);
+    if (iaBusy) return;
+    iaBusy = true;
+    const btn = $('ia-refresh');
+    btn.disabled = true;
+    btn.textContent = 'Generando…';
+    $('ia-groups-existentes').innerHTML = '<p class="empty-note">Generando<span class="loading-dots"></span></p>';
+    $('ia-groups-originales').innerHTML = '<p class="empty-note">Generando<span class="loading-dots"></span></p>';
+    $('ia-meta').textContent = 'Generando…';
     try {
-      result = await sampler.json(IA_PROMPT, { modelTier: 'default', cache: false, signal: t.signal });
-    } catch(err){
-      const info = sampleErrorText(err);
-      const wrap1 = document.getElementById('ia-groups-existentes');
-      const wrap2 = document.getElementById('ia-groups-originales');
-      if (info.hide) {
-        wrap1.innerHTML = '<p class="empty-note">' + info.text + '</p>';
-        wrap2.innerHTML = '';
-      } else {
-        wrap1.innerHTML = '<p class="empty-note">' + info.text + ' <button class="btn small secondary" id="ia-retry-inline">Reintentar</button></p>';
-        wrap2.innerHTML = '';
-        const retryBtn = document.getElementById('ia-retry-inline');
-        if (retryBtn) retryBtn.addEventListener('click', generateIdeas);
-      }
-      document.getElementById('ia-meta').textContent = 'Sin ideas activas';
-      iaGenerating = false;
-      setResetButtonState(false, '↻ Reiniciar ideas');
-      t.clear();
-      return;
-    }
-    t.clear();
-
-    const now = new Date().toISOString();
-    const list = Array.isArray(result) ? result : (result.ideas || []);
-    iaState.ideas = list.map(function(it, i){
-      return {
+      const result = await callAIJson({ prompt: IA_PROMPT, jsonMode: true, maxTokens: 2400, temperature: 0.9 });
+      const list = Array.isArray(result) ? result : (result.ideas || []);
+      if (!list.length) throw new Error('La IA no devolvió ideas.');
+      const now = new Date().toISOString();
+      iaState.ideas = list.map((it, i) => ({
         id: 'idea_' + Date.now() + '_' + i,
-        type: (it.type === 'original') ? 'original' : 'existente',
+        type: it.type === 'original' ? 'original' : 'existente',
         category: it.category || 'General',
         title: it.title || 'Idea sin título',
         desc: it.desc || '',
         generatedAt: now
-      };
-    });
-    iaState.hasGenerated = true;
-    await iaSaveState();
-    renderAllIdeas();
-    iaGenerating = false;
-    setResetButtonState(false, '↻ Reiniciar ideas');
+      }));
+      saveIa();
+      renderAllIdeas();
+    } catch(e){
+      $('ia-groups-existentes').innerHTML = '<p class="empty-note">⚠️ ' + escapeHtml(e.message) + '</p>';
+      $('ia-groups-originales').innerHTML = '';
+      $('ia-meta').textContent = 'Error';
+    } finally {
+      iaBusy = false;
+      btn.disabled = false;
+      btn.textContent = '✨ Generar nuevas';
+    }
   }
 
-  document.getElementById('ia-reset').addEventListener('click', generateIdeas);
+  $('ia-refresh').addEventListener('click', generateIdeas);
 
-  async function initIA(){
+  function initIA(){
+    renderIaBadge();
+    renderSaved();
     if (iaLoaded) return;
     iaLoaded = true;
-    await iaLoadState();
-    renderSaved();
-    if (!iaState.hasGenerated && iaState.ideas.length === 0) {
-      await generateIdeas();
+    if (iaState.ideas.length === 0){
+      generateIdeas();
     } else {
       renderAllIdeas();
     }
   }
 
-  // ---------- Aprendizaje > YouTube ----------
-  const AP_LS_KEY = 'alegc_aprendizaje_v1';
-  let apState = { feed: [], savedForLater: [], lastGeneratedDate: null };
-  let apLoaded = false;
-  let apGenerating = false;
+  // ==================== ASISTENTE (chat) ====================
+  const CHAT_KEY = 'alegc_chat_v2';
+  let chatHistory = safeLocalGet(CHAT_KEY, []);
+  let chatBusy = false;
+  let chatInited = false;
 
-  function todayStr(){ return new Date().toISOString().slice(0, 10); }
+  function saveChat(){
+    // Limitar a los últimos 60 mensajes para no llenar localStorage
+    if (chatHistory.length > 60) chatHistory = chatHistory.slice(-60);
+    safeLocalSet(CHAT_KEY, chatHistory);
+  }
 
-  function apLocalSave(){ try { localStorage.setItem(AP_LS_KEY, JSON.stringify(apState)); } catch(e){} }
-  function apLocalLoad(){
-    try { const raw = localStorage.getItem(AP_LS_KEY); if (raw) apState = Object.assign(apState, JSON.parse(raw)); } catch(e){}
+  function renderChat(){
+    const body = $('chat-body');
+    if (!chatHistory.length){
+      body.innerHTML = '<div class="msg assistant">Hola 👋 Soy tu asistente. Pregúntame lo que quieras: ideas, explicaciones, ayuda para escribir, lo que necesites.</div>';
+      return;
+    }
+    body.innerHTML = chatHistory.map(m => {
+      const cls = m.role === 'user' ? 'user' : (m.error ? 'error' : 'assistant');
+      return '<div class="msg ' + cls + '">' + escapeHtml(m.content) + '</div>';
+    }).join('');
+    body.scrollTop = body.scrollHeight;
   }
-  async function apSaveState(){
-    apLocalSave();
-    if (db) { try { await db.doc('alegc/aprendizaje').set(apState); } catch(e){} }
+
+  function appendChat(role, content, isError){
+    chatHistory.push({ role, content, error: !!isError, date: new Date().toISOString() });
+    saveChat();
+    renderChat();
   }
-  async function apLoadState(){
-    apLocalLoad();
-    if (db) {
-      try { const doc = await db.doc('alegc/aprendizaje').get(); if (doc && doc.exists) apState = Object.assign(apState, doc.data()); } catch(e){}
+
+  async function sendChat(text){
+    if (!text.trim() || chatBusy) return;
+    chatBusy = true;
+    const sendBtn = $('chat-send');
+    sendBtn.disabled = true;
+
+    appendChat('user', text.trim());
+    $('chat-input').value = '';
+    $('chat-input').style.height = 'auto';
+
+    // Mostrar "escribiendo..."
+    const body = $('chat-body');
+    const typing = document.createElement('div');
+    typing.className = 'msg assistant typing';
+    typing.textContent = 'Escribiendo…';
+    body.appendChild(typing);
+    body.scrollTop = body.scrollHeight;
+
+    try {
+      const messages = chatHistory
+        .filter(m => !m.error)
+        .slice(-10)
+        .map(m => ({ role: m.role, content: m.content }));
+      const reply = await callAI({ messages, maxTokens: 1500, temperature: 0.8 });
+      typing.remove();
+      appendChat('assistant', reply);
+    } catch(e){
+      typing.remove();
+      appendChat('assistant', '⚠️ ' + e.message, true);
+    } finally {
+      chatBusy = false;
+      sendBtn.disabled = false;
+      $('chat-input').focus();
     }
   }
 
-  const AP_THUMB_MAP = {
-    'Teorías':          { a: '#B8912E', b: '#6B531A', icon: '💡' },
-    'Historias':        { a: '#A9532F', b: '#5E2C18', icon: '📜' },
-    'Tutoriales':       { a: '#2E4A38', b: '#16261E', icon: '🛠️' },
-    'Cine':             { a: '#4A3A5A', b: '#241C30', icon: '🎬' },
-    'Psicología':       { a: '#2E4A5A', b: '#1C2E3A', icon: '🧠' },
-    'Videojuegos':      { a: '#5A2E44', b: '#2E1C24', icon: '🕹️' },
-    'Relaciones':       { a: '#A9532F', b: '#B8912E', icon: '💞' },
-    'Proyectos de IA':  { a: '#16261E', b: '#B8912E', icon: '🤖' }
+  $('chat-send').addEventListener('click', () => sendChat($('chat-input').value));
+
+  $('chat-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendChat(e.target.value);
+    }
+  });
+
+  $('chat-input').addEventListener('input', (e) => {
+    e.target.style.height = 'auto';
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+  });
+
+  document.querySelectorAll('#chat-suggestions .chip').forEach(chip => {
+    chip.addEventListener('click', () => sendChat(chip.textContent));
+  });
+
+  $('chat-clear').addEventListener('click', () => {
+    if (!chatHistory.length) return;
+    if (confirm('¿Borrar toda la conversación?')){
+      chatHistory = [];
+      saveChat();
+      renderChat();
+    }
+  });
+
+  function initChat(){
+    if (chatInited) return;
+    chatInited = true;
+    renderChat();
+    $('chat-input').focus();
+  }
+
+  // ==================== YOUTUBE ====================
+  const AP_KEY = 'alegc_ap_v2';
+  const AP_SAVED_KEY = 'alegc_ap_saved_v2';
+  let apState = safeLocalGet(AP_KEY, { feed: [] });
+  let apSaved = safeLocalGet(AP_SAVED_KEY, []);
+  let apLoaded = false;
+  let apBusy = false;
+
+  function saveAp(){ safeLocalSet(AP_KEY, apState); }
+  function saveApSaved(){ safeLocalSet(AP_SAVED_KEY, apSaved); }
+
+  const AP_THUMBS = {
+    'Teorías':         { a: '#B8912E', b: '#6B531A', icon: '💡' },
+    'Historias':       { a: '#A9532F', b: '#5E2C18', icon: '📜' },
+    'Tutoriales':      { a: '#2E4A38', b: '#16261E', icon: '🛠️' },
+    'Cine':            { a: '#4A3A5A', b: '#241C30', icon: '🎬' },
+    'Psicología':      { a: '#2E4A5A', b: '#1C2E3A', icon: '🧠' },
+    'Videojuegos':     { a: '#5A2E44', b: '#2E1C24', icon: '🕹️' },
+    'Relaciones':      { a: '#A9532F', b: '#B8912E', icon: '💞' },
+    'Proyectos de IA': { a: '#16261E', b: '#B8912E', icon: '🤖' }
   };
+
   function thumbSvg(category){
-    const c = AP_THUMB_MAP[category] || { a: '#6B655A', b: '#3A362F', icon: '▶️' };
+    const c = AP_THUMBS[category] || { a: '#6B655A', b: '#3A362F', icon: '▶️' };
     const gid = 'g' + Math.random().toString(36).slice(2, 9);
-    return '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + escapeHtml(category) + '">' +
+    return '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img">' +
       '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1">' +
         '<stop offset="0%" stop-color="' + c.a + '"/><stop offset="100%" stop-color="' + c.b + '"/>' +
       '</linearGradient></defs>' +
@@ -1194,22 +1839,16 @@
     '</svg>';
   }
 
-  const AP_CATEGORY_POOL = 'Teorías, Historias, Tutoriales, Cine, Psicología, Videojuegos, Relaciones, Proyectos de IA';
-  const AP_PROMPT = 'Genera exactamente 6 ideas de videos de YouTube, cada una de una categoría distinta de esta lista (usa las 6 más variadas posibles, no repitas categoría): ' + AP_CATEGORY_POOL + '. ' +
-    'Están pensadas para alguien que suele ver videos mientras come o descansa, y a quien le gustan temas como: por qué las relaciones de hoy son más sencillas, teorías de cómo la IA podría dominar el mundo, ideas de proyectos con IA, cine, psicología, videojuegos, historias y documentales, y tutoriales prácticos. ' +
-    'No propongas noticias de actualidad ni nada con fecha de caducidad — eso será una sección aparte más adelante. Sé específico, nunca genérico, y varía las ideas cada vez que te pidan esto. Responde en español. ' +
-    'Responde SOLO con un array JSON, sin texto antes ni después, con este formato exacto: ' +
-    '[{"category":"Teorías|Historias|Tutoriales|Cine|Psicología|Videojuegos|Relaciones|Proyectos de IA","title":"título llamativo y específico, como lo buscarías en YouTube","hook":"1-2 frases explicando por qué vale la pena verlo","search_query":"la búsqueda exacta en español que se debería escribir en YouTube para encontrar justo este tipo de video"}]';
-
   function videoCardHtml(v, savedView){
-    const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(v.query || v.title);
+    const q = v.query || v.title;
+    const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
     const actions = savedView
-      ? '<div class="icon-group"><button class="icon-btn remove-video-btn" title="Quitar de guardados" data-id="' + v.id + '">🗑️</button></div>'
+      ? '<div class="icon-group"><button class="icon-btn remove-video" data-id="' + escapeAttr(v.id) + '" title="Quitar">🗑️</button></div>'
       : '<div class="icon-group">' +
-          '<button class="icon-btn flag-video-btn" title="Guardar para más tarde" data-id="' + v.id + '">🚩</button>' +
-          '<button class="icon-btn trash-video-btn" title="Quitar del feed" data-id="' + v.id + '">🗑️</button>' +
+          '<button class="icon-btn flag-video" data-id="' + escapeAttr(v.id) + '" title="Guardar">🚩</button>' +
+          '<button class="icon-btn trash-video" data-id="' + escapeAttr(v.id) + '" title="Descartar">🗑️</button>' +
         '</div>';
-    return '<div class="video-card" data-id="' + v.id + '">' +
+    return '<div class="video-card">' +
       '<div class="video-thumb">' + thumbSvg(v.category) + '</div>' +
       '<div class="video-body">' +
         '<span class="badge">' + escapeHtml(v.category) + '</span>' +
@@ -1217,134 +1856,119 @@
         '<p class="video-reason">' + escapeHtml(v.hook) + '</p>' +
       '</div>' +
       '<div class="video-actions-row">' +
-        '<a class="btn small" href="' + ytUrl + '" target="_blank" rel="noopener">▶ Ver</a>' +
+        '<a class="btn small" href="' + escapeAttr(ytUrl) + '" target="_blank" rel="noopener noreferrer">▶ Ver</a>' +
         actions +
       '</div>' +
-      '<div class="video-meta">Sugerido: ' + fmtDateTime(v.generatedAt) + '</div>' +
+      '<div class="video-meta">Sugerido: ' + escapeHtml(fmtDateTime(v.generatedAt)) + '</div>' +
     '</div>';
   }
 
   function renderFeed(){
-    const grid = document.getElementById('ap-grid');
-    const meta = document.getElementById('ap-meta');
-    if (!apState.feed.length) {
-      grid.innerHTML = '<p class="empty-note">No hay recomendaciones activas. Presiona "Nuevas recomendaciones".</p>';
-      meta.textContent = 'Sin recomendaciones';
+    const grid = $('ap-grid');
+    if (!apState.feed.length){
+      grid.innerHTML = '<p class="empty-note">Sin recomendaciones activas.</p>';
+      $('ap-meta').textContent = 'Sin recomendaciones';
       return;
     }
-    grid.innerHTML = apState.feed.map(function(v){ return videoCardHtml(v, false); }).join('');
-    meta.textContent = apState.feed.length + ' recomendaciones';
-    grid.querySelectorAll('.flag-video-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ flagVideo(btn.dataset.id); });
+    grid.innerHTML = apState.feed.map(v => videoCardHtml(v, false)).join('');
+    $('ap-meta').textContent = apState.feed.length + ' recomendaciones';
+    grid.querySelectorAll('.flag-video').forEach(btn => {
+      btn.addEventListener('click', () => flagVideo(btn.dataset.id));
     });
-    grid.querySelectorAll('.trash-video-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ trashVideo(btn.dataset.id); });
+    grid.querySelectorAll('.trash-video').forEach(btn => {
+      btn.addEventListener('click', () => trashVideo(btn.dataset.id));
     });
   }
 
   function renderSavedVideos(){
-    const grid = document.getElementById('ap-saved-grid');
-    const badge = document.getElementById('ap-saved-count');
-    badge.textContent = apState.savedForLater.length;
-    if (!apState.savedForLater.length) {
-      grid.innerHTML = '<p class="empty-note">Aún no has guardado ningún video.</p>';
+    const grid = $('ap-saved-grid');
+    $('ap-saved-count').textContent = apSaved.length;
+    if (!apSaved.length){
+      grid.innerHTML = '<p class="empty-note">Nada guardado aún.</p>';
       return;
     }
-    grid.innerHTML = apState.savedForLater.map(function(v){ return videoCardHtml(v, true); }).join('');
-    grid.querySelectorAll('.remove-video-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        apState.savedForLater = apState.savedForLater.filter(v=>v.id !== btn.dataset.id);
-        apSaveState();
+    grid.innerHTML = apSaved.map(v => videoCardHtml(v, true)).join('');
+    grid.querySelectorAll('.remove-video').forEach(btn => {
+      btn.addEventListener('click', () => {
+        apSaved = apSaved.filter(v => v.id !== btn.dataset.id);
+        saveApSaved();
         renderSavedVideos();
       });
     });
   }
 
   function flagVideo(id){
-    const idx = apState.feed.findIndex(v=>v.id === id);
+    const idx = apState.feed.findIndex(v => v.id === id);
     if (idx === -1) return;
     const v = apState.feed.splice(idx, 1)[0];
-    apState.savedForLater.unshift(v);
-    apSaveState();
-    renderFeed();
-    renderSavedVideos();
+    apSaved.unshift(v);
+    saveAp(); saveApSaved();
+    renderFeed(); renderSavedVideos();
+    showToast('Video guardado');
   }
   function trashVideo(id){
-    apState.feed = apState.feed.filter(v=>v.id !== id);
-    apSaveState();
+    apState.feed = apState.feed.filter(v => v.id !== id);
+    saveAp();
     renderFeed();
   }
 
-  function setApButtonState(disabled, label){
-    const btn = document.getElementById('ap-refresh');
-    btn.disabled = disabled;
-    btn.textContent = label;
-  }
+  const AP_CATEGORIES = 'Teorías, Historias, Tutoriales, Cine, Psicología, Videojuegos, Relaciones, Proyectos de IA';
+  const AP_PROMPT = 'Genera exactamente 6 ideas de videos de YouTube, cada una de una categoría DISTINTA de esta lista (usa 6 variadas, sin repetir): ' + AP_CATEGORIES + '. ' +
+    'Para alguien que ve videos mientras come o descansa, interesado en: relaciones modernas, teorías de IA, proyectos con IA, cine, psicología, videojuegos, historias y tutoriales. ' +
+    'NO noticias de actualidad. Sé específico, variado, español. ' +
+    'Responde SOLO con un objeto JSON con esta forma exacta: ' +
+    '{"videos":[{"category":"Teorías|Historias|Tutoriales|Cine|Psicología|Videojuegos|Relaciones|Proyectos de IA","title":"título llamativo y específico","hook":"1-2 frases de por qué vale la pena","search_query":"búsqueda exacta en YouTube"}]}';
 
   async function generateFeed(){
-    if (apGenerating) return;
-    const grid = document.getElementById('ap-grid');
-    if (!sampler) {
-      grid.innerHTML = '<p class="empty-note">La generación con IA no está disponible en esta vista.</p>';
-      return;
-    }
-    apGenerating = true;
-    setApButtonState(true, 'Generando…');
-    grid.innerHTML = '<p class="empty-note">Buscando cosas buenas para hoy<span class="loading-dots"></span></p>';
-    document.getElementById('ap-meta').textContent = 'Generando…';
-
-    let result = null;
-    const t = makeTimeoutSignal(30000);
+    if (apBusy) return;
+    apBusy = true;
+    const btn = $('ap-refresh');
+    btn.disabled = true;
+    btn.textContent = 'Generando…';
+    $('ap-grid').innerHTML = '<p class="empty-note">Buscando cosas buenas<span class="loading-dots"></span></p>';
+    $('ap-meta').textContent = 'Generando…';
     try {
-      result = await sampler.json(AP_PROMPT, { modelTier: 'default', cache: false, signal: t.signal });
-    } catch(err){
-      t.clear();
-      const info = sampleErrorText(err);
-      if (info.hide) {
-        grid.innerHTML = '<p class="empty-note">' + info.text + '</p>';
-      } else {
-        grid.innerHTML = '<p class="empty-note">' + info.text + ' <button class="btn small secondary" id="ap-retry-inline">Reintentar</button></p>';
-        const retryBtn = document.getElementById('ap-retry-inline');
-        if (retryBtn) retryBtn.addEventListener('click', generateFeed);
-      }
-      document.getElementById('ap-meta').textContent = 'Sin recomendaciones';
-      apGenerating = false;
-      setApButtonState(false, '🔄 Nuevas recomendaciones');
-      return;
-    }
-    t.clear();
-
-    const now = new Date().toISOString();
-    const list = Array.isArray(result) ? result : (result.videos || []);
-    apState.feed = list.map(function(it, i){
-      return {
-        id: 'video_' + Date.now() + '_' + i,
+      const result = await callAIJson({ prompt: AP_PROMPT, jsonMode: true, maxTokens: 1800, temperature: 0.95 });
+      const list = Array.isArray(result) ? result : (result.videos || []);
+      if (!list.length) throw new Error('La IA no devolvió videos.');
+      const now = new Date().toISOString();
+      apState.feed = list.map((it, i) => ({
+        id: 'v_' + Date.now() + '_' + i,
         category: it.category || 'General',
         title: it.title || 'Video sin título',
         hook: it.hook || '',
         query: it.search_query || it.title,
         generatedAt: now
-      };
-    });
-    apState.lastGeneratedDate = todayStr();
-    await apSaveState();
-    renderFeed();
-    apGenerating = false;
-    setApButtonState(false, '🔄 Nuevas recomendaciones');
+      }));
+      saveAp();
+      renderFeed();
+    } catch(e){
+      $('ap-grid').innerHTML = '<p class="empty-note">⚠️ ' + escapeHtml(e.message) + '</p>';
+      $('ap-meta').textContent = 'Error';
+    } finally {
+      apBusy = false;
+      btn.disabled = false;
+      btn.textContent = '🔄 Nuevas recomendaciones';
+    }
   }
 
-  document.getElementById('ap-refresh').addEventListener('click', generateFeed);
+  $('ap-refresh').addEventListener('click', generateFeed);
 
-  async function initAprendizaje(){
-    if (!apLoaded) { apLoaded = true; await apLoadState(); renderSavedVideos(); }
-    if (!apState.feed.length || apState.lastGeneratedDate !== todayStr()) {
-      await generateFeed();
+  function initAprendizaje(){
+    renderSavedVideos();
+    if (apLoaded) return;
+    apLoaded = true;
+    if (apState.feed.length === 0){
+      generateFeed();
     } else {
       renderFeed();
     }
   }
 
-  initCapabilities();
+  // ==================== INICIALIZACIÓN ====================
+  renderHome();
+  renderStats();
+
 })();
 </script>
 </body>
