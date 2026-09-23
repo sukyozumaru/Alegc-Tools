@@ -8,6 +8,17 @@ const ALLOWED_ORIGINS = [
 
 const SYSTEM_PROMPT = 'Eres un asistente útil, directo y sin relleno. Respondes SIEMPRE en español. Cuando te pidan JSON, devuelves solo JSON válido, sin texto adicional ni bloques de código.';
 
+// Modelos en orden de preferencia (se irán probando si el anterior falla)
+const MODELOS_DISPONIBLES = [
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-20b',
+  'llama-3.3-70b-versatile',
+  'llama-3.1-8b-instant',
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'qwen/qwen3-32b',
+  'gemma2-9b-it'
+];
+
 function cors(origin) {
   const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
@@ -41,7 +52,7 @@ export async function onRequestPost({ request, env }) {
 
   const { prompt, messages, jsonMode, maxTokens = 2048, temperature = 0.8 } = body || {};
 
-  // Construye el array de mensajes para Groq
+  // Construir array de mensajes
   let groqMessages;
   if (Array.isArray(messages) && messages.length > 0) {
     groqMessages = [
@@ -63,102 +74,86 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Falta prompt o messages', code: 'bad_request' }, 400, origin);
   }
 
-     // Modelos en orden de preferencia: si el primero falla, intenta el siguiente
-    const MODELOS_DISPONIBLES = [
-      'llama-3.3-70b-versatile',
-      'llama-3.1-70b-versatile',
-      'llama-3.1-8b-instant',
-      'llama3-70b-8192',
-      'llama3-8b-8192',
-      'gemma2-9b-it'
-    ];
+  const baseParams = {
+    messages: groqMessages,
+    max_tokens: Math.min(Math.max(256, maxTokens), 4096),
+    temperature: Math.min(Math.max(0, temperature), 2)
+  };
 
-    let ultimoError = null;
-    let respuestaGroq = null;
+  let ultimoError = null;
 
-    for (const modelo of MODELOS_DISPONIBLES) {
-      const groqBody = {
-        model: modelo,
-        messages: groqMessages,
-        max_tokens: Math.min(Math.max(256, maxTokens), 4096),
-        temperature: Math.min(Math.max(0, temperature), 2)
-      };
-      if (jsonMode) groqBody.response_format = { type: 'json_object' };
+  // Intento 1: con JSON mode si se pidió
+  for (const modelo of MODELOS_DISPONIBLES) {
+    const payload = { model: modelo, ...baseParams };
+    if (jsonMode) payload.response_format = { type: 'json_object' };
 
-      try {
-        const intento = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${env.GROQ_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(groqBody)
-        });
+    const resultado = await intentarGroq(payload, env.GROQ_API_KEY);
+    if (resultado.ok) return json({ text: resultado.text }, 200, origin);
 
-        if (intento.ok) {
-          respuestaGroq = intento;
-          break;
-        }
-
-        const errData = await intento.json().catch(() => ({}));
-        const errMsg = errData?.error?.message || '';
-
-        // Si es error de "modelo no existe", probamos el siguiente
-        if (errMsg.includes('does not exist') || errMsg.includes('do not have access')) {
-          ultimoError = errMsg;
-          continue;
-        }
-
-        // Si es otro error (rate limit, auth, etc), devolvemos ese
-        respuestaGroq = intento;
-        break;
-      } catch (e) {
-        ultimoError = 'Error de red: ' + e.message;
-        continue;
-      }
+    // Si el modelo no existe, probamos el siguiente
+    if (resultado.reason === 'no_model') {
+      ultimoError = resultado.message;
+      continue;
     }
 
-    if (!respuestaGroq) {
-      return json({
-        error: 'Ningún modelo disponible funcionó. Último error: ' + ultimoError,
-        code: 'no_model'
-      }, 500, origin);
+    // Si falla por JSON mode, reintentamos sin él (mismo modelo)
+    if (resultado.reason === 'json_mode_unsupported' && jsonMode) {
+      const payloadSinJson = { model: modelo, ...baseParams };
+      const retry = await intentarGroq(payloadSinJson, env.GROQ_API_KEY);
+      if (retry.ok) return json({ text: retry.text }, 200, origin);
+      ultimoError = retry.message;
+      continue;
     }
 
-    const groqRes = respuestaGroq;
-  if (jsonMode) {
-    groqBody.response_format = { type: 'json_object' };
+    // Otros errores (rate limit, auth, etc) los devolvemos directo
+    const code = resultado.status === 429 ? 'rate_limited' : 'upstream';
+    return json({ error: resultado.message, code }, resultado.status || 500, origin);
   }
 
-  let groqRes;
+  return json({
+    error: 'Ningún modelo disponible respondió. Último error: ' + (ultimoError || 'desconocido'),
+    code: 'no_model'
+  }, 500, origin);
+}
+
+async function intentarGroq(payload, apiKey) {
+  let res;
   try {
-    groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${env.GROQ_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(groqBody)
+      body: JSON.stringify(payload)
     });
-  } catch {
-    return json({ error: 'No se pudo contactar a Groq', code: 'upstream' }, 502, origin);
+  } catch (e) {
+    return { ok: false, status: 502, reason: 'network', message: 'Error de red: ' + e.message };
   }
 
   let data;
   try {
-    data = await groqRes.json();
+    data = await res.json();
   } catch {
-    return json({ error: 'Respuesta inválida de Groq', code: 'upstream' }, 502, origin);
+    return { ok: false, status: 502, reason: 'parse', message: 'Respuesta inválida de Groq' };
   }
 
-  if (!groqRes.ok) {
-    const code = groqRes.status === 429 ? 'rate_limited' : 'upstream';
-    return json({
-      error: data?.error?.message || 'Error al generar',
-      code
-    }, groqRes.status, origin);
+  if (res.ok) {
+    const text = data?.choices?.[0]?.message?.content || '';
+    return { ok: true, text };
   }
 
-  const text = data?.choices?.[0]?.message?.content || '';
-  return json({ text }, 200, origin);
+  const errMsg = data?.error?.message || 'Error desconocido';
+
+  // Detectar problemas específicos
+  if (errMsg.includes('does not exist') || errMsg.includes('do not have access') || errMsg.includes('model_not_found')) {
+    return { ok: false, status: res.status, reason: 'no_model', message: errMsg };
+  }
+
+  // Algunos modelos no soportan response_format json_object
+  if (errMsg.includes('response_format') || errMsg.includes('json_object') || errMsg.includes('json mode')) {
+    return { ok: false, status: res.status, reason: 'json_mode_unsupported', message: errMsg };
+  }
+
+  return { ok: false, status: res.status, reason: 'other', message: errMsg };
 }
