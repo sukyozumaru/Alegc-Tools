@@ -1,0 +1,27 @@
+{
+  "name": "Alegc Tools — Oficina personal",
+  "short_name": "Alegc Tools",
+  "description": "Dashboard personal: diario, calendario, ideas con IA, asistente, YouTube e Instagram.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0F1712",
+  "theme_color": "#B8912E",
+  "lang": "es",
+  "categories": ["productivity", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
