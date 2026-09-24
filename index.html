@@ -617,6 +617,34 @@
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
   ::-webkit-scrollbar-thumb:hover { background: #cfc8b8; }
 
+    /* ===== FIX: Día seleccionado con highlight minimalista (sin relleno blanco) ===== */
+  .cal-day.selected {
+    background: var(--paper);
+    border-color: var(--gold);
+    border-width: 2px;
+  }
+  :root[data-theme="dark"] .cal-day.selected {
+    background: var(--paper);
+    border-color: var(--gold);
+  }
+
+  /* ===== FIX: Contraste del brand "Alegc Tools" en modo oscuro ===== */
+  :root[data-theme="dark"] .brand .mark {
+    color: #F3EFE6;
+  }
+  :root[data-theme="dark"] .brand .mark em {
+    color: #E9C97A;
+  }
+  :root[data-theme="dark"] .brand .sub {
+    color: #8FA08F;
+  }
+
+  /* ===== FIX: Día "hoy" en mini-calendario del dashboard en dark mode ===== */
+  :root[data-theme="dark"] .mini-cal-day.today {
+    background: var(--gold);
+    color: #1A2420;
+  }
+
   /* ===== FIX MODO OSCURO: contraste correcto en todos los elementos ===== */
   :root[data-theme="dark"] .msg.assistant {
     background: var(--paper-card);
