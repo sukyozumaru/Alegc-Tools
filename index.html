@@ -797,6 +797,180 @@
     }
   }
 
+    /* ===== IDEAS IA: TARJETA RICA ===== */
+  .idea-card.type-productividad { border-left-color: var(--blue); }
+
+  .idea-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+  .idea-tag {
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .idea-tag.type-existente {
+    background: var(--gold-soft);
+    color: #6B531A;
+  }
+  .idea-tag.type-original {
+    background: var(--clay-soft);
+    color: var(--clay);
+  }
+  .idea-tag.type-productividad {
+    background: rgba(59, 111, 160, 0.15);
+    color: var(--blue);
+  }
+  .idea-tag.impacto-alto {
+    background: rgba(62, 122, 82, 0.15);
+    color: var(--green);
+  }
+  .idea-tag.impacto-medio {
+    background: rgba(184, 145, 46, 0.15);
+    color: var(--gold);
+  }
+  .idea-tag.impacto-bajo {
+    background: rgba(120, 120, 120, 0.12);
+    color: var(--text-soft);
+  }
+  .idea-tag.time {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-soft);
+  }
+  :root[data-theme="dark"] .idea-tag.type-existente {
+    color: #E9C97A;
+  }
+  :root[data-theme="dark"] .idea-tag.type-original {
+    color: #F0A888;
+  }
+  :root[data-theme="dark"] .idea-tag.type-productividad {
+    color: #7AAEDC;
+  }
+  :root[data-theme="dark"] .idea-tag.impacto-alto {
+    color: #7AC690;
+  }
+
+  .idea-why, .idea-step {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+  .idea-why .label,
+  .idea-step .label {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .idea-separator {
+    height: 1px;
+    background: var(--line);
+    margin: 12px 0 2px;
+    opacity: 0.6;
+  }
+
+  .idea-card .idea-desc {
+    margin-bottom: 4px;
+  }
+
+  /* ===== IDEAS IA: TARJETA RICA ===== */
+  .idea-card.type-productividad { border-left-color: var(--blue); }
+
+  .idea-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+  .idea-tag {
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .idea-tag.type-existente {
+    background: var(--gold-soft);
+    color: #6B531A;
+  }
+  .idea-tag.type-original {
+    background: var(--clay-soft);
+    color: var(--clay);
+  }
+  .idea-tag.type-productividad {
+    background: rgba(59, 111, 160, 0.15);
+    color: var(--blue);
+  }
+  .idea-tag.impacto-alto {
+    background: rgba(62, 122, 82, 0.15);
+    color: var(--green);
+  }
+  .idea-tag.impacto-medio {
+    background: rgba(184, 145, 46, 0.15);
+    color: var(--gold);
+  }
+  .idea-tag.impacto-bajo {
+    background: rgba(120, 120, 120, 0.12);
+    color: var(--text-soft);
+  }
+  .idea-tag.time {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-soft);
+  }
+  :root[data-theme="dark"] .idea-tag.type-existente {
+    color: #E9C97A;
+  }
+  :root[data-theme="dark"] .idea-tag.type-original {
+    color: #F0A888;
+  }
+  :root[data-theme="dark"] .idea-tag.type-productividad {
+    color: #7AAEDC;
+  }
+  :root[data-theme="dark"] .idea-tag.impacto-alto {
+    color: #7AC690;
+  }
+
+  .idea-why, .idea-step {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+  .idea-why .label,
+  .idea-step .label {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .idea-separator {
+    height: 1px;
+    background: var(--line);
+    margin: 12px 0 2px;
+    opacity: 0.6;
+  }
+
+  .idea-card .idea-desc {
+    margin-bottom: 4px;
+  }
+
   /* ===== RESPONSIVE MÓVIL ===== */
   .menu-toggle {
     display: none;
@@ -1455,9 +1629,10 @@
       <h1 class="page-title">Ideas IA</h1>
       <p class="page-desc">Dos mundos: herramientas que ya existen y puedes probar hoy, y conceptos originales que podrías construir desde cero.</p>
 
-      <div class="tabs" id="ia-tabs">
+            <div class="tabs" id="ia-tabs">
         <button class="seg-tab active" data-iatab="existentes">Ya existen</button>
         <button class="seg-tab" data-iatab="originales">Crear desde cero</button>
+        <button class="seg-tab" data-iatab="productividad">Productividad</button>
         <button class="seg-tab" data-iatab="guardadas">Guardadas <span class="badge" id="saved-count-badge">0</span></button>
       </div>
 
@@ -1469,8 +1644,8 @@
       <section class="seg-panel active" id="iapanel-existentes">
         <div id="ia-groups-existentes"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
       </section>
-      <section class="seg-panel" id="iapanel-originales">
-        <div id="ia-groups-originales"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
+      <section class="seg-panel" id="iapanel-productividad">
+        <div id="ia-groups-productividad"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
       </section>
       <section class="seg-panel" id="iapanel-guardadas">
         <div id="ia-saved-list"><p class="empty-note">Aún no has guardado ninguna idea.</p></div>
@@ -2412,19 +2587,41 @@
     $('saved-count-badge').textContent = iaSaved.length;
   }
 
-  const IA_CATS = ['App', 'Página', 'Música', 'YouTube', 'Proyecto', 'General'];
+  const IA_CATS = ['App', 'Página', 'Música', 'YouTube', 'Proyecto', 'Workflow', 'Prompt', 'Sistema', 'General'];
+  
+  const IMPACTO_ICON = { alto: '💪', medio: '⚡', bajo: '🌱' };
+  const IMPACTO_LABEL = { alto: 'Alto', medio: 'Medio', bajo: 'Bajo' };
 
   function ideaCardHtml(idea){
-    const typeTag = idea.type === 'original'
-      ? '<span class="tag-original">Crear desde cero</span>'
-      : '<span class="tag-existente">Ya existe</span>';
-    return '<div class="idea-card type-' + (idea.type === 'original' ? 'original' : 'existente') + '">' +
+    const type = idea.type || 'existente';
+    const typeLabel = type === 'original' ? 'Crear desde cero' : (type === 'productividad' ? 'Productividad' : 'Ya existe');
+    const typeClass = 'type-' + type;
+    const impacto = IMPACTO_ICON[idea.impact] ? idea.impact : 'medio';
+
+    let tagsHtml = '<div class="idea-tags">';
+    tagsHtml += '<span class="idea-tag ' + typeClass + '">' + typeLabel + '</span>';
+    if (idea.category) tagsHtml += '<span class="idea-tag time">' + escapeHtml(idea.category) + '</span>';
+    tagsHtml += '<span class="idea-tag impacto-' + impacto + '">' + IMPACTO_ICON[impacto] + ' ' + IMPACTO_LABEL[impacto] + '</span>';
+    if (idea.time) tagsHtml += '<span class="idea-tag time">⏱️ ' + escapeHtml(idea.time) + '</span>';
+    tagsHtml += '</div>';
+
+    let bodyHtml = '<h4>' + escapeHtml(idea.title) + '</h4>' +
+      '<p class="idea-desc">' + escapeHtml(idea.desc) + '</p>';
+
+    if (idea.why || idea.firstStep) {
+      bodyHtml += '<div class="idea-separator"></div>';
+      if (idea.why) {
+        bodyHtml += '<div class="idea-why"><span class="label">💡 Por qué:</span><span>' + escapeHtml(idea.why) + '</span></div>';
+      }
+      if (idea.firstStep) {
+        bodyHtml += '<div class="idea-step"><span class="label">🚀 Primer paso:</span><span>' + escapeHtml(idea.firstStep) + '</span></div>';
+      }
+    }
+
+    return '<div class="idea-card ' + typeClass + '">' +
       '<div class="idea-top">' +
-        '<div>' + typeTag +
-          '<h4>' + escapeHtml(idea.title) + '</h4>' +
-          '<p class="idea-desc">' + escapeHtml(idea.desc) + '</p>' +
-        '</div>' +
-        '<div class="idea-actions">' +
+        '<div style="flex:1; min-width:0;">' + tagsHtml + bodyHtml + '</div>' +
+        '<div class="idea-actions" style="align-self:flex-start;">' +
           '<button class="icon-btn flag-btn" data-id="' + escapeAttr(idea.id) + '" title="Guardar">🚩</button>' +
           '<button class="icon-btn trash-btn" data-id="' + escapeAttr(idea.id) + '" title="Descartar">🗑️</button>' +
         '</div>' +
@@ -2462,12 +2659,14 @@
     });
   }
 
-  function renderAllIdeas(){
-    const ex = iaState.ideas.filter(i => i.type === 'existente');
-    const or = iaState.ideas.filter(i => i.type === 'original');
+    function renderAllIdeas(){
+    const ex = iaState.ideas.filter(function(i){ return i.type === 'existente'; });
+    const or = iaState.ideas.filter(function(i){ return i.type === 'original'; });
+    const pr = iaState.ideas.filter(function(i){ return i.type === 'productividad'; });
     renderIdeaGroup('ia-groups-existentes', ex);
     renderIdeaGroup('ia-groups-originales', or);
-    $('ia-meta').textContent = ex.length + ' existentes · ' + or.length + ' originales';
+    renderIdeaGroup('ia-groups-productividad', pr);
+    $('ia-meta').textContent = ex.length + ' existentes · ' + or.length + ' originales · ' + pr.length + ' productividad';
   }
 
   function flagIdea(id){
@@ -2512,14 +2711,22 @@
     });
   }
 
-  const IA_PROMPT = 'Genera exactamente 12 ideas sobre inteligencia artificial para una persona curiosa. ' +
-    'Divide en dos tipos EXACTOS, 6 de cada uno: ' +
-    '"existente" = herramienta, app, página o técnica musical que YA EXISTE hoy y se puede usar ahora (nombra la herramienta real); ' +
-    '"original" = concepto que NO existe todavía, algo innovador que se podría diseñar y construir desde cero. ' +
-    'Cada idea lleva una categoría: "App", "Página", "Música", "YouTube" o "Proyecto" (usa "General" solo si no encaja). ' +
-    'Sé específico, accionable, variado. Responde en español. ' +
-    'Responde SOLO con un objeto JSON con esta forma exacta: ' +
-    '{"ideas":[{"type":"existente|original","category":"App|Página|Música|YouTube|Proyecto|General","title":"string corto","desc":"1-2 frases"}]}';
+  const IA_PROMPT = 'Genera exactamente 12 ideas sobre inteligencia artificial, tecnología y productividad personal para alguien curioso que quiere aprovechar la IA al máximo. ' +
+    'Divide en TRES tipos EXACTOS, 4 ideas de cada uno: ' +
+    '(1) "existente" = una herramienta, app o técnica musical REAL que YA EXISTE hoy y se puede usar ahora mismo (nombra la herramienta real, no inventes). Sus categorías permitidas SOLO: "App", "Música" o "Proyecto". ' +
+    '(2) "original" = un concepto que NO existe todavía, algo innovador que se podría diseñar y construir desde cero. Sus categorías permitidas: "App", "Página", "Música", "YouTube" o "Proyecto". ' +
+    '(3) "productividad" = un workflow, sistema, combo de herramientas, prompt o rutina concreta que mejora la productividad personal usando IA (ej: "combinar Notion + Zapier + IA para triage de emails"). Sus categorías permitidas: "Workflow", "Prompt" o "Sistema". ' +
+    'Cada idea debe ser ESPECÍFICA, ACCIONABLE y NADA GENÉRICA. Nada de "usa ChatGPT para escribir", eso es demasiado obvio. ' +
+    'Para cada idea incluye: ' +
+    'title (máximo 6 palabras), ' +
+    'desc (1-2 frases explicando qué es), ' +
+    'why (1 frase: por qué vale la pena, qué problema resuelve o qué la hace única), ' +
+    'firstStep (1 acción concreta y simple para empezar HOY), ' +
+    'impact (una de: "alto", "medio", "bajo", según cuánto mejora la vida del usuario), ' +
+    'time (tiempo estimado para empezar, formato corto como "5 min", "20 min", "1 hora", "1 día"). ' +
+    'Varía las categorías y los temas. Responde en español. ' +
+    'Responde SOLO con un objeto JSON con esta forma exacta, sin texto antes ni después: ' +
+    '{"ideas":[{"type":"existente|original|productividad","category":"App|Página|Música|YouTube|Proyecto|Workflow|Prompt|Sistema","title":"string corto","desc":"1-2 frases","why":"1 frase","firstStep":"1 acción concreta","impact":"alto|medio|bajo","time":"5 min"}]}';
 
   async function generateIdeas(){
     if (iaBusy) return;
@@ -2535,14 +2742,28 @@
       const list = Array.isArray(result) ? result : (result.ideas || []);
       if (!list.length) throw new Error('La IA no devolvió ideas.');
       const now = new Date().toISOString();
-      iaState.ideas = list.map((it, i) => ({
-        id: 'idea_' + Date.now() + '_' + i,
-        type: it.type === 'original' ? 'original' : 'existente',
-        category: it.category || 'General',
-        title: it.title || 'Idea sin título',
-        desc: it.desc || '',
-        generatedAt: now
-      }));
+         const CATEGORIAS_PROHIBIDAS_EXISTENTE = ['Página', 'YouTube'];
+    iaState.ideas = list
+      .filter((it) => {
+        if (it.type !== 'existente') return true;
+        const cat = it.category || 'General';
+        return CATEGORIAS_PROHIBIDAS_EXISTENTE.indexOf(cat) === -1;
+      })
+      .map((it, i) => {
+        const tipo = (it.type === 'original' || it.type === 'productividad') ? it.type : 'existente';
+        return {
+          id: 'idea_' + Date.now() + '_' + i,
+          type: tipo,
+          category: it.category || 'General',
+          title: it.title || 'Idea sin título',
+          desc: it.desc || '',
+          why: it.why || '',
+          firstStep: it.firstStep || '',
+          impact: (it.impact === 'alto' || it.impact === 'medio' || it.impact === 'bajo') ? it.impact : 'medio',
+          time: it.time || '',
+          generatedAt: now
+        };
+      });
       saveIa();
       renderAllIdeas();
     } catch(e){
