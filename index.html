@@ -665,6 +665,16 @@
     transition: opacity 0.25s;
     pointer-events: none;
   }
+  
+    .menu-toggle.is-open {
+    background: var(--gold);
+    color: var(--ink);
+  }
+  :root[data-theme="dark"] .menu-toggle.is-open {
+    background: var(--gold);
+    color: #1A2420;
+  }
+
   .sidebar-overlay.active {
     display: block;
     opacity: 1;
@@ -2671,14 +2681,24 @@
   const sidebarEl = document.querySelector('.sidebar');
   const overlayEl = document.getElementById('sidebar-overlay');
 
-  function abrirMenu(){
+    function abrirMenu(){
     if (sidebarEl) sidebarEl.classList.add('open');
     if (overlayEl) overlayEl.classList.add('active');
+    if (menuToggle) {
+      menuToggle.classList.add('is-open');
+      menuToggle.textContent = '✕';
+      menuToggle.setAttribute('aria-label', 'Cerrar menú');
+    }
     document.body.style.overflow = 'hidden';
   }
   function cerrarMenu(){
     if (sidebarEl) sidebarEl.classList.remove('open');
     if (overlayEl) overlayEl.classList.remove('active');
+    if (menuToggle) {
+      menuToggle.classList.remove('is-open');
+      menuToggle.textContent = '☰';
+      menuToggle.setAttribute('aria-label', 'Abrir menú');
+    }
     document.body.style.overflow = '';
   }
   function toggleMenu(e){
