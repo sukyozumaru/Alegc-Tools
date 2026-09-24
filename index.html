@@ -618,6 +618,11 @@
       <button class="nav-item" data-view="instagram"><span class="dot"></span> Instagram</button>
       <button class="nav-item" data-view="aprendizaje"><span class="dot"></span> YouTube</button>
     </nav>
+    
+    <nav class="nav-group">
+      <div class="nav-label">Sistema</div>
+      <button class="nav-item" data-view="ajustes"><span class="dot"></span> Ajustes</button>
+    </nav>
 
     <nav class="nav-group">
       <div class="nav-label">Próximamente</div>
@@ -918,6 +923,51 @@
       </section>
     </div>
 
+      <!-- ====== AJUSTES ====== -->
+    <div class="view" id="view-ajustes">
+      <div class="crumb">Sistema &nbsp;/&nbsp; <b>Ajustes</b></div>
+      <h1 class="page-title">Ajustes</h1>
+      <p class="page-desc">Respalda tus datos, administra el almacenamiento y personaliza tu experiencia.</p>
+
+      <div class="grid cols-2">
+
+        <div class="card">
+          <h3>💾 Respaldar tus datos</h3>
+          <p style="color:var(--text-soft); font-size:13.5px; margin: 6px 0 16px;">
+            Descarga un archivo con todo lo que has guardado: diario, eventos, ideas, chat, Instagram y YouTube. Guárdalo en un lugar seguro (Drive, Dropbox, email a ti mismo).
+          </p>
+          <button class="btn" id="export-data">📤 Exportar todo (.json)</button>
+        </div>
+
+        <div class="card">
+          <h3>📥 Restaurar desde respaldo</h3>
+          <p style="color:var(--text-soft); font-size:13.5px; margin: 6px 0 16px;">
+            Sube un archivo exportado previamente para recuperar tu información. <b>Se reemplazará todo</b> lo actual.
+          </p>
+          <input type="file" id="import-file" accept=".json" style="display:none">
+          <button class="btn secondary" id="import-data">📂 Seleccionar archivo</button>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <h3>📊 Espacio utilizado</h3>
+          <p style="color:var(--text-soft); font-size:13.5px; margin: 6px 0 12px;">
+            localStorage tiene un límite aproximado de 5MB por navegador. Esto es lo que llevas:
+          </p>
+          <div id="storage-info" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1; border-color: #E8C4B5;">
+          <h3>🗑️ Zona peligrosa</h3>
+          <p style="color:var(--text-soft); font-size:13.5px; margin: 6px 0 16px;">
+            Elimina <b>todos</b> tus datos de este navegador. No hay vuelta atrás. Exporta un respaldo antes.
+          </p>
+          <button class="btn" id="wipe-data" style="background: var(--danger);">Eliminar todos mis datos</button>
+        </div>
+
+      </div>
+    </div>
+
+    
   </main>
 </div>
 
@@ -1046,6 +1096,7 @@
     if (viewName === 'ia') initIA();
     if (viewName === 'aprendizaje') initAprendizaje();
     if (viewName === 'asistente') initChat();
+    if (viewName === 'ajustes') initAjustes();
     if (viewName === 'instagram') renderStats();
   }
   navItems.forEach(item => {
