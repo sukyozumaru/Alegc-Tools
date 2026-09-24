@@ -1,7 +1,7 @@
 // Alegc Tools · Service Worker
 // Cachea los archivos estáticos y permite funcionar offline.
 
-const CACHE_VERSION = 'alegc-v2.0.0';
+const CACHE_VERSION = 'alegc-v2.2.0';
 const STATIC_CACHE = CACHE_VERSION + '-static';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
