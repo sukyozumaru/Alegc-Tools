@@ -31,6 +31,37 @@
     --shadow-sm: 0 1px 3px rgba(20,30,25,0.06);
     --shadow-md: 0 6px 20px rgba(20,30,25,0.08);
   }
+  
+    /* ===== TEMA OSCURO ===== */
+  :root[data-theme="dark"] {
+    --ink: #EDE8DD;
+    --ink-soft: #C8C0B0;
+    --cream: #0F1712;
+    --callout-bg: #1F2A24;
+    --paper: #0F1712;
+    --paper-card: #1A2420;
+    --line: #2A3833;
+    --gold: #D4A93E;
+    --gold-soft: #3D3420;
+    --clay: #D07A50;
+    --text: #EDE8DD;
+    --text-soft: #8B9B92;
+    --danger: #D65A4A;
+    --clay-soft: #3A2820;
+    --green: #5FA876;
+    --blue: #5B92C4;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 6px 20px rgba(0,0,0,0.4);
+  }
+
+  :root[data-theme="dark"] .sidebar {
+    background: #0A0F0C;
+  }
+
+  body, .card, .sidebar, .nav-item, .cal-day, .mini-cal-day {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  }
+
   * { box-sizing: border-box; }
   html { color-scheme: light; }
   html, body {
@@ -591,9 +622,12 @@
 
 <div class="app">
   <aside class="sidebar">
-    <div class="brand">
-      <div class="mark">Alegc <em>Tools</em></div>
-      <div class="sub">tu espacio personal</div>
+      <div class="brand" style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+      <div>
+        <div class="mark">Alegc <em>Tools</em></div>
+        <div class="sub">tu espacio personal</div>
+      </div>
+      <button id="theme-toggle" title="Cambiar tema" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--gold-soft);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;">🌙</button>
     </div>
 
     <nav class="nav-group">
@@ -650,7 +684,7 @@
               <button id="mc-next" aria-label="Mes siguiente">›</button>
             </div>
           </div>
-          <div class="mini-cal" id="mc-grid"></div>
+          <div class="mini-cal-grid" id="mc-grid"></div>
         </div>
 
         <div class="card">
@@ -1082,6 +1116,49 @@
       catch(e2){ throw new Error('La IA devolvió un formato inesperado.'); }
     }
   }
+
+  // ==================== TEMA (CLARO/OSCURO) ====================
+  const THEME_KEY = 'alegc_theme_v2';
+
+  function aplicarTema(theme){
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    const btn = $('theme-toggle');
+    if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+
+  function initTema(){
+    let theme = null;
+    try { theme = localStorage.getItem(THEME_KEY); } catch(e){}
+    if (!theme) {
+      theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    aplicarTema(theme);
+    const btn = $('theme-toggle');
+    if (btn) {
+      btn.addEventListener('click', function(){
+        const actual = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const nuevo = actual === 'dark' ? 'light' : 'dark';
+        aplicarTema(nuevo);
+        try { localStorage.setItem(THEME_KEY, nuevo); } catch(e){}
+      });
+    }
+  }
+
+  // Aplicar tema ANTES de renderizar (evita flash blanco al recargar)
+  (function(){
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch(e){}
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  })();
+
 
   // ==================== NAVEGACIÓN ====================
   const navItems = document.querySelectorAll('.nav-item[data-view]');
