@@ -616,6 +616,165 @@
   ::-webkit-scrollbar { width: 9px; height: 9px; }
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
   ::-webkit-scrollbar-thumb:hover { background: #cfc8b8; }
+
+  /* ===== FIX MODO OSCURO: contraste correcto en todos los elementos ===== */
+  :root[data-theme="dark"] .msg.assistant {
+    background: var(--paper-card);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .msg.user {
+    background: var(--gold);
+    color: #1A2420;
+  }
+  :root[data-theme="dark"] .msg.error {
+    background: var(--clay-soft);
+    color: #F0B8A8;
+    border-color: #5E3A2E;
+  }
+  :root[data-theme="dark"] .msg.typing {
+    background: var(--paper-card);
+    color: var(--text-soft);
+  }
+  :root[data-theme="dark"] .chat-head {
+    background: var(--paper-card);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .chat-input-row {
+    background: var(--paper-card);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .chat-input-row textarea {
+    background: var(--paper);
+    color: var(--text);
+  }
+  :root[data-theme="dark"] .chat-input-row textarea:focus {
+    background: var(--paper-card);
+    border-color: var(--gold);
+  }
+  :root[data-theme="dark"] .chat-input-row textarea::placeholder {
+    color: var(--text-soft);
+  }
+  :root[data-theme="dark"] .chat-send-btn {
+    background: var(--gold);
+    color: #1A2420;
+  }
+  :root[data-theme="dark"] .chat-send-btn:hover {
+    background: #C4972E;
+  }
+  :root[data-theme="dark"] .chip {
+    background: var(--paper-card);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .chip:hover {
+    background: var(--gold-soft);
+    border-color: var(--gold);
+  }
+  :root[data-theme="dark"] .field input,
+  :root[data-theme="dark"] .field select,
+  :root[data-theme="dark"] .field textarea {
+    background: var(--paper);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .field input:focus,
+  :root[data-theme="dark"] .field select:focus,
+  :root[data-theme="dark"] .field textarea:focus {
+    background: var(--paper-card);
+    border-color: var(--gold);
+  }
+  :root[data-theme="dark"] .field input::placeholder,
+  :root[data-theme="dark"] .field textarea::placeholder {
+    color: var(--text-soft);
+  }
+  /* Autofill de Chrome (input number con número guardado) */
+  :root[data-theme="dark"] .field input:-webkit-autofill,
+  :root[data-theme="dark"] .field input:-webkit-autofill:hover,
+  :root[data-theme="dark"] .field input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text);
+    -webkit-box-shadow: 0 0 0 1000px var(--paper) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  :root[data-theme="dark"] .diario-textarea {
+    background: var(--paper);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .diario-textarea:focus {
+    background: var(--paper-card);
+    border-color: var(--gold);
+  }
+  :root[data-theme="dark"] .entry-actions button {
+    background: var(--paper-card);
+    color: var(--text-soft);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .entry-actions button:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  :root[data-theme="dark"] .cal-day:hover,
+  :root[data-theme="dark"] .mini-cal-day:hover {
+    background: var(--paper-card);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .mini-cal-day.today,
+  :root[data-theme="dark"] .cal-day.today {
+    background: var(--gold);
+    color: #1A2420;
+  }
+  :root[data-theme="dark"] .mini-cal-day.today .cal-day-event {
+    background: rgba(0,0,0,0.15);
+    color: #1A2420;
+  }
+  :root[data-theme="dark"] .btn {
+    background: var(--gold);
+    color: #1A2420;
+  }
+  :root[data-theme="dark"] .btn:hover {
+    background: #C4972E;
+  }
+  :root[data-theme="dark"] .btn.secondary {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .btn.secondary:hover {
+    background: rgba(255,255,255,0.06);
+  }
+  :root[data-theme="dark"] .quick-btn {
+    background: var(--paper);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .quick-btn:hover {
+    background: var(--paper-card);
+    border-color: var(--gold);
+  }
+  :root[data-theme="dark"] .icon-btn {
+    background: var(--paper);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  :root[data-theme="dark"] .nav-item.active {
+    background: rgba(212, 169, 62, 0.15);
+    color: var(--gold);
+  }
+  :root[data-theme="dark"] .soon-tag {
+    color: #4A554E;
+    border-color: #2A3833;
+  }
+  :root[data-theme="dark"] .sidebar-foot {
+    color: #5A655E;
+  }
+  :root[data-theme="dark"] .card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  :root[data-theme="dark"] .stat-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+
 </style>
 </head>
 <body>
