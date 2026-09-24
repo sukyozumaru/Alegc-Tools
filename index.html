@@ -625,6 +625,93 @@
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
   ::-webkit-scrollbar-thumb:hover { background: #cfc8b8; }
 
+  /* ===== DIARIO: VISTA LIBRETA ===== */
+  .diario-lista {
+    display: grid;
+    gap: 12px;
+  }
+  .diario-entry {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .diario-entry:hover {
+    border-color: var(--gold);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .diario-entry-mood {
+    font-size: 24px;
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+  .diario-entry-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .diario-entry-fecha {
+    font-size: 12.5px;
+    color: var(--text-soft);
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  .diario-entry-preview {
+    font-size: 14.5px;
+    color: var(--text);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
+  .diario-entry-arrow {
+    color: var(--text-soft);
+    font-size: 22px;
+    flex-shrink: 0;
+    align-self: center;
+    line-height: 1;
+  }
+
+  .detalle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .detalle-mood {
+    font-size: 34px;
+    line-height: 1;
+  }
+  .detalle-fecha {
+    font-size: 13px;
+    color: var(--text-soft);
+    text-align: right;
+  }
+  .detalle-texto {
+    font-size: 15.5px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+  .detalle-acciones {
+    display: flex;
+    gap: 8px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+
   /* ===== RESPONSIVE MÓVIL ===== */
   .menu-toggle {
     display: none;
@@ -1144,16 +1231,29 @@
       </div>
     </div>
 
-    <!-- ====== DIARIO ====== -->
+       <!-- ====== DIARIO ====== -->
     <div class="view" id="view-diario">
-      <div class="crumb">Personal &nbsp;/&nbsp; <b>Diario</b></div>
-      <h1 class="page-title">Diario</h1>
-      <p class="page-desc">Escribe lo que quieras: lo que pensaste, cómo te sentiste, qué hiciste hoy. Todo queda guardado solo en tu navegador.</p>
 
-      <div class="diario-layout">
-        <div class="card">
-          <h3>✍️ Nueva entrada</h3>
-          <div class="field" style="margin-top:14px;">
+      <!-- Vista LISTA -->
+      <div id="diario-lista-view">
+        <div class="crumb">Personal &nbsp;/&nbsp; <b>Diario</b></div>
+        <h1 class="page-title">Diario</h1>
+        <p class="page-desc">Tu libreta personal. Cada entrada es un documento que puedes abrir, editar y releer cuando quieras.</p>
+
+        <button class="btn" id="diario-new-btn" style="margin-bottom:20px;">✏️ Nueva entrada</button>
+
+        <div id="diario-lista" class="diario-lista">
+          <p class="empty-note">Aún no has escrito nada. ¡Empieza hoy!</p>
+        </div>
+      </div>
+
+      <!-- Vista EDITOR -->
+      <div id="diario-editor-view" style="display:none">
+        <div class="crumb">Personal &nbsp;/&nbsp; Diario &nbsp;/&nbsp; <b id="diario-editor-mode">Nueva entrada</b></div>
+        <h1 class="page-title" id="diario-editor-title">Nueva entrada</h1>
+
+        <div class="card" style="max-width:800px;">
+          <div class="field">
             <label>¿Cómo te sientes hoy?</label>
             <div class="mood-row" id="mood-row">
               <button class="mood-btn" data-mood="😄" title="Genial">😄</button>
@@ -1167,17 +1267,31 @@
           <textarea class="diario-textarea" id="diario-input" placeholder="Hoy fue un día..."></textarea>
           <div class="diario-meta-row">
             <span style="font-size:12.5px; color:var(--text-soft);" id="diario-count">0 caracteres</span>
-            <button class="btn" id="diario-save">💾 Guardar entrada</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>📚 Entradas anteriores</h3>
-          <div class="entries-list" id="entries-list" style="margin-top:14px;">
-            <p class="empty-note">Aún no has escrito nada. ¡Empieza hoy!</p>
+            <div style="display:flex; gap:8px;">
+              <button class="btn secondary" id="diario-cancel">Cancelar</button>
+              <button class="btn" id="diario-save">💾 Guardar</button>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Vista DETALLE -->
+      <div id="diario-detalle-view" style="display:none">
+        <button class="btn small secondary" id="diario-back" style="margin-bottom:16px;">← Volver</button>
+
+        <div class="card" style="max-width:800px;">
+          <div class="detalle-header">
+            <div class="detalle-mood" id="detalle-mood">📄</div>
+            <div class="detalle-fecha" id="detalle-fecha">—</div>
+          </div>
+          <div class="detalle-texto" id="detalle-texto"></div>
+          <div class="detalle-acciones">
+            <button class="btn small secondary" id="detalle-editar">✏️ Editar</button>
+            <button class="btn small" id="detalle-eliminar" style="background:var(--danger);">🗑️ Eliminar</button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ====== CALENDARIO ====== -->
@@ -1726,48 +1840,159 @@
     el.addEventListener('click', () => goTo(el.dataset.quick === 'ia' ? 'ia' : el.dataset.quick));
   });
 
-  // ==================== DIARIO ====================
+   // ==================== DIARIO (VISTA LIBRETA) ====================
   const DIARIO_KEY = 'alegc_diario_v2';
   let currentMood = '';
+  let diarioEditandoId = null;
+  let diarioDetalleId = null;
 
-  function renderDiario(){
-    const list = safeLocalGet(DIARIO_KEY, []);
-    const wrap = $('entries-list');
-    if (!list.length){
+  function generarId(){
+    return 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  }
+
+  function cargarEntradas(){
+    const arr = safeLocalGet(DIARIO_KEY, []);
+    let cambio = false;
+    arr.forEach(function(e){
+      if (!e.id) { e.id = generarId(); cambio = true; }
+    });
+    if (cambio) safeLocalSet(DIARIO_KEY, arr);
+    return arr;
+  }
+
+  function mostrarDiarioVista(vista, id){
+    $('diario-lista-view').style.display = vista === 'lista' ? 'block' : 'none';
+    $('diario-editor-view').style.display = vista === 'editor' ? 'block' : 'none';
+    $('diario-detalle-view').style.display = vista === 'detalle' ? 'block' : 'none';
+
+    if (vista === 'lista') renderDiarioLista();
+    if (vista === 'editor') renderDiarioEditor(id);
+    if (vista === 'detalle') renderDiarioDetalle(id);
+  }
+
+  function renderDiarioLista(){
+    const arr = cargarEntradas();
+    const wrap = $('diario-lista');
+    if (!arr.length) {
       wrap.innerHTML = '<p class="empty-note">Aún no has escrito nada. ¡Empieza hoy!</p>';
       return;
     }
-    wrap.innerHTML = list.slice().reverse().map((entry, idx) => {
-      const i = list.length - 1 - idx;
-      return '<div class="entry-card" data-i="' + i + '">' +
-        '<div class="entry-head">' +
-          '<span>' + escapeHtml(fmtDateTime(entry.date)) + '</span>' +
-          '<div style="display:flex; gap:8px; align-items:center;">' +
-            (entry.mood ? '<span class="entry-mood">' + escapeHtml(entry.mood) + '</span>' : '') +
-            '<div class="entry-actions">' +
-              '<button data-action="delete" data-i="' + i + '" title="Eliminar">🗑️</button>' +
-            '</div>' +
-          '</div>' +
+    const ordenadas = arr.slice().sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+    wrap.innerHTML = ordenadas.map(function(e){
+      const preview = e.text.length > 140 ? e.text.slice(0, 140) + '…' : e.text;
+      const fecha = fmtDateTime(e.date);
+      return '<div class="diario-entry" data-id="' + escapeAttr(e.id) + '">' +
+        '<div class="diario-entry-mood">' + escapeHtml(e.mood || '📄') + '</div>' +
+        '<div class="diario-entry-body">' +
+          '<div class="diario-entry-fecha">' + escapeHtml(fecha) + '</div>' +
+          '<div class="diario-entry-preview">' + escapeHtml(preview) + '</div>' +
         '</div>' +
-        '<div class="entry-text">' + escapeHtml(entry.text) + '</div>' +
+        '<div class="diario-entry-arrow">›</div>' +
       '</div>';
     }).join('');
-
-    wrap.querySelectorAll('[data-action="delete"]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const arr = safeLocalGet(DIARIO_KEY, []);
-        arr.splice(parseInt(btn.dataset.i, 10), 1);
-        safeLocalSet(DIARIO_KEY, arr);
-        renderDiario();
-        showToast('Entrada eliminada');
+    wrap.querySelectorAll('.diario-entry').forEach(function(el){
+      el.addEventListener('click', function(){
+        mostrarDiarioVista('detalle', el.dataset.id);
       });
     });
   }
 
-  document.querySelectorAll('.mood-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-      if (currentMood === btn.dataset.mood){
+  function renderDiarioEditor(id){
+    diarioEditandoId = id || null;
+    const arr = cargarEntradas();
+
+    if (id) {
+      const entry = arr.find(function(e){ return e.id === id; });
+      if (!entry) { mostrarDiarioVista('lista'); return; }
+      $('diario-editor-mode').textContent = 'Editar entrada';
+      $('diario-editor-title').textContent = 'Editar entrada';
+      $('diario-input').value = entry.text;
+      currentMood = entry.mood || '';
+      document.querySelectorAll('.mood-btn').forEach(function(b){
+        b.classList.toggle('selected', b.dataset.mood === currentMood);
+      });
+      $('diario-count').textContent = entry.text.length + ' caracteres';
+    } else {
+      $('diario-editor-mode').textContent = 'Nueva entrada';
+      $('diario-editor-title').textContent = 'Nueva entrada';
+      $('diario-input').value = '';
+      currentMood = '';
+      document.querySelectorAll('.mood-btn').forEach(function(b){ b.classList.remove('selected'); });
+      $('diario-count').textContent = '0 caracteres';
+    }
+  }
+
+  function renderDiarioDetalle(id){
+    const arr = cargarEntradas();
+    const entry = arr.find(function(e){ return e.id === id; });
+    if (!entry) { mostrarDiarioVista('lista'); return; }
+    diarioDetalleId = id;
+    $('detalle-mood').textContent = entry.mood || '📄';
+    $('detalle-fecha').textContent = fmtDateTime(entry.date);
+    $('detalle-texto').textContent = entry.text;
+  }
+
+  if ($('diario-new-btn')) {
+    $('diario-new-btn').addEventListener('click', function(){ mostrarDiarioVista('editor', null); });
+  }
+  if ($('diario-back')) {
+    $('diario-back').addEventListener('click', function(){ mostrarDiarioVista('lista'); });
+  }
+  if ($('diario-cancel')) {
+    $('diario-cancel').addEventListener('click', function(){
+      if (diarioEditandoId) mostrarDiarioVista('detalle', diarioEditandoId);
+      else mostrarDiarioVista('lista');
+    });
+  }
+  if ($('diario-save')) {
+    $('diario-save').addEventListener('click', function(){
+      const text = $('diario-input').value.trim();
+      if (!text) { showToast('Escribe algo primero'); return; }
+      const arr = cargarEntradas();
+      let idFinal;
+      if (diarioEditandoId) {
+        const entry = arr.find(function(e){ return e.id === diarioEditandoId; });
+        if (entry) {
+          entry.text = text;
+          entry.mood = currentMood;
+          entry.editedAt = new Date().toISOString();
+        }
+        idFinal = diarioEditandoId;
+        showToast('Entrada actualizada ✅');
+      } else {
+        const nueva = {
+          id: generarId(),
+          text: text,
+          mood: currentMood,
+          date: new Date().toISOString()
+        };
+        arr.push(nueva);
+        idFinal = nueva.id;
+        showToast('Entrada guardada ✅');
+      }
+      safeLocalSet(DIARIO_KEY, arr);
+      mostrarDiarioVista('detalle', idFinal);
+    });
+  }
+  if ($('detalle-editar')) {
+    $('detalle-editar').addEventListener('click', function(){
+      mostrarDiarioVista('editor', diarioDetalleId);
+    });
+  }
+  if ($('detalle-eliminar')) {
+    $('detalle-eliminar').addEventListener('click', function(){
+      if (!confirm('¿Eliminar esta entrada permanentemente?')) return;
+      const arr = cargarEntradas().filter(function(e){ return e.id !== diarioDetalleId; });
+      safeLocalSet(DIARIO_KEY, arr);
+      showToast('Entrada eliminada');
+      mostrarDiarioVista('lista');
+    });
+  }
+
+  document.querySelectorAll('.mood-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.mood-btn').forEach(function(b){ b.classList.remove('selected'); });
+      if (currentMood === btn.dataset.mood) {
         currentMood = '';
       } else {
         currentMood = btn.dataset.mood;
@@ -1776,24 +2001,15 @@
     });
   });
 
-  $('diario-input').addEventListener('input', (e) => {
-    $('diario-count').textContent = e.target.value.length + ' caracteres';
-  });
+  if ($('diario-input')) {
+    $('diario-input').addEventListener('input', function(e){
+      $('diario-count').textContent = e.target.value.length + ' caracteres';
+    });
+  }
 
-  $('diario-save').addEventListener('click', () => {
-    const text = $('diario-input').value.trim();
-    if (!text){ showToast('Escribe algo primero'); return; }
-    const arr = safeLocalGet(DIARIO_KEY, []);
-    arr.push({ text, mood: currentMood, date: new Date().toISOString() });
-    if (safeLocalSet(DIARIO_KEY, arr)){
-      $('diario-input').value = '';
-      $('diario-count').textContent = '0 caracteres';
-      currentMood = '';
-      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-      renderDiario();
-      showToast('Entrada guardada ✅');
-    }
-  });
+  function renderDiario(){
+    mostrarDiarioVista('lista');
+  }
 
   // ==================== CALENDARIO ====================
   const EVENTOS_KEY = 'alegc_eventos_v2';
