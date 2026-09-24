@@ -2667,28 +2667,49 @@
 })();
 
   // ==================== MENÚ MÓVIL (HAMBURGUESA) ====================
-  const menuToggle = $('menu-toggle');
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = $('sidebar-overlay');
+   const menuToggle = document.getElementById('menu-toggle');
+  const sidebarEl = document.querySelector('.sidebar');
+  const overlayEl = document.getElementById('sidebar-overlay');
 
   function abrirMenu(){
-    if (sidebar) sidebar.classList.add('open');
-    if (overlay) overlay.classList.add('active');
+    if (sidebarEl) sidebarEl.classList.add('open');
+    if (overlayEl) overlayEl.classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
   function cerrarMenu(){
-    if (sidebar) sidebar.classList.remove('open');
-    if (overlay) overlay.classList.remove('active');
+    if (sidebarEl) sidebarEl.classList.remove('open');
+    if (overlayEl) overlayEl.classList.remove('active');
+    document.body.style.overflow = '';
   }
-  function toggleMenu(){
-    if (sidebar && sidebar.classList.contains('open')) {
+  function toggleMenu(e){
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (sidebarEl && sidebarEl.classList.contains('open')) {
       cerrarMenu();
     } else {
       abrirMenu();
     }
   }
 
-  if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
-  if (overlay) overlay.addEventListener('click', cerrarMenu);
+  if (menuToggle) {
+    let touchHandled = false;
+    menuToggle.addEventListener('touchstart', function(e){
+      touchHandled = true;
+      toggleMenu(e);
+      setTimeout(function(){ touchHandled = false; }, 400);
+    }, { passive: false });
+    menuToggle.addEventListener('click', function(e){
+      if (touchHandled) { e.preventDefault(); return; }
+      toggleMenu(e);
+    });
+  }
+
+  if (overlayEl) {
+    overlayEl.addEventListener('click', cerrarMenu);
+    overlayEl.addEventListener('touchstart', function(e){
+      e.preventDefault();
+      cerrarMenu();
+    }, { passive: false });
+  }
 
   document.querySelectorAll('.nav-item[data-view]').forEach(function(item){
     item.addEventListener('click', function(){
@@ -2697,7 +2718,7 @@
       }
     });
   });
-
+  
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape') cerrarMenu();
   });
