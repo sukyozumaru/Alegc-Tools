@@ -2018,6 +2018,152 @@
     }
   }
 
+  // ==================== AJUSTES ====================
+  const STORAGE_KEYS = {
+    diario: 'alegc_diario_v2',
+    eventos: 'alegc_eventos_v2',
+    ia: 'alegc_ia_v2',
+    ia_saved: 'alegc_ia_saved_v2',
+    ap: 'alegc_ap_v2',
+    ap_saved: 'alegc_ap_saved_v2',
+    chat: 'alegc_chat_v2',
+    instagram: 'alegc_instagram_v2'
+  };
+
+  const STORAGE_LABELS = {
+    diario: '📔 Diario',
+    eventos: '📅 Calendario',
+    ia: '✨ Ideas IA',
+    ia_saved: '⭐ Ideas guardadas',
+    ap: '🎬 YouTube',
+    ap_saved: '⭐ YouTube guardados',
+    chat: '💬 Asistente',
+    instagram: '📷 Instagram'
+  };
+
+  function formatBytes(bytes){
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  function calcularUsoStorage(){
+    let total = 0;
+    const detalle = {};
+    Object.entries(STORAGE_KEYS).forEach(function(entry){
+      const name = entry[0];
+      const key = entry[1];
+      try {
+        const raw = localStorage.getItem(key);
+        const size = raw ? new Blob([raw]).size : 0;
+        detalle[name] = size;
+        total += size;
+      } catch(e){ detalle[name] = 0; }
+    });
+    return { total: total, detalle: detalle };
+  }
+
+  function renderStorageInfo(){
+    const usage = calcularUsoStorage();
+    const total = usage.total;
+    const detalle = usage.detalle;
+    const limite = 5 * 1024 * 1024;
+    const porcentaje = Math.min(100, (total / limite) * 100);
+
+    let html = '<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">' +
+      '<span><b>' + formatBytes(total) + '</b> usados</span>' +
+      '<span style="color:var(--text-soft);">' + porcentaje.toFixed(1) + '% del límite (~5MB)</span>' +
+      '</div>' +
+      '<div style="background:var(--paper); border-radius:999px; overflow:hidden; height:10px; margin-bottom:18px;">' +
+        '<div style="width:' + porcentaje + '%; height:100%; background: linear-gradient(90deg, var(--gold), var(--clay)); transition: width 0.3s;"></div>' +
+      '</div>';
+
+    html += '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; font-size:13px;">';
+    Object.entries(detalle).forEach(function(entry){
+      const name = entry[0];
+      const size = entry[1];
+      html += '<div style="display:flex; justify-content:space-between; padding: 7px 0; border-bottom: 1px solid var(--line);">' +
+        '<span>' + (STORAGE_LABELS[name] || name) + '</span>' +
+        '<span style="color:var(--text-soft);">' + formatBytes(size) + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    const el = $('storage-info');
+    if (el) el.innerHTML = html;
+  }
+
+  function initAjustes(){
+    renderStorageInfo();
+  }
+
+  const exportBtn = $('export-data');
+  if (exportBtn) exportBtn.addEventListener('click', function(){
+    const backup = { app: 'Alegc Tools', version: 2, exportedAt: new Date().toISOString(), data: {} };
+    Object.entries(STORAGE_KEYS).forEach(function(entry){
+      const name = entry[0];
+      const key = entry[1];
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) backup.data[name] = JSON.parse(raw);
+      } catch(e){}
+    });
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'alegc-tools-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Respaldo descargado ✅');
+  });
+
+  const importBtn = $('import-data');
+  const importFile = $('import-file');
+  if (importBtn && importFile) {
+    importBtn.addEventListener('click', function(){ importFile.click(); });
+    importFile.addEventListener('change', function(e){
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024){ showToast('Archivo demasiado grande'); return; }
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        try {
+          const backup = JSON.parse(ev.target.result);
+          if (!backup.data || typeof backup.data !== 'object') throw new Error('bad');
+          if (!confirm('Esto reemplazará TODOS tus datos actuales. ¿Continuar?')) {
+            importFile.value = '';
+            return;
+          }
+          Object.entries(backup.data).forEach(function(entry){
+            const name = entry[0];
+            const value = entry[1];
+            if (STORAGE_KEYS[name]) {
+              try { localStorage.setItem(STORAGE_KEYS[name], JSON.stringify(value)); } catch(e){}
+            }
+          });
+          showToast('Datos restaurados ✅ Recargando...');
+          setTimeout(function(){ window.location.reload(); }, 1200);
+        } catch(err){
+          showToast('⚠️ Archivo inválido');
+          importFile.value = '';
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  const wipeBtn = $('wipe-data');
+  if (wipeBtn) wipeBtn.addEventListener('click', function(){
+    if (!confirm('⚠️ Esto BORRARÁ TODOS tus datos permanentemente. ¿Estás seguro?')) return;
+    if (!confirm('Última advertencia: NO hay vuelta atrás. ¿Borrar todo?')) return;
+    Object.values(STORAGE_KEYS).forEach(function(key){
+      try { localStorage.removeItem(key); } catch(e){}
+    });
+    showToast('Datos eliminados. Recargando...');
+    setTimeout(function(){ window.location.reload(); }, 1200);
+  });
+
   // ==================== INICIALIZACIÓN ====================
   renderHome();
   renderStats();
