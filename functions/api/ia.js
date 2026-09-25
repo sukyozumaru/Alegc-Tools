@@ -176,9 +176,9 @@ async function intentarGroq(payload, apiKey) {
     return { ok: false, status: res.status, reason: 'json_mode_unsupported', message: errMsg };
   }
 
-  return { ok: false, status: res.status, reason: 'other', message: errMsg };
-}
-
-  if (errMsg.includes('validate JSON') || errMsg.includes('failed_generation') || errMsg.includes('json_validate_failed') || errMsg.includes('Failed to validate')) {
+   if (errMsg.includes('validate JSON') || errMsg.includes('failed_generation') || errMsg.includes('json_validate_failed') || errMsg.includes('Failed to validate')) {
     return { ok: false, status: res.status, reason: 'json_invalid', message: errMsg };
   }
+
+  return { ok: false, status: res.status, reason: 'other', message: errMsg };
+}
