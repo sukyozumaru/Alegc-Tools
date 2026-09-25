@@ -2588,7 +2588,7 @@
   }
 
   const IA_CATS = ['App', 'Página', 'Música', 'YouTube', 'Proyecto', 'Workflow', 'Prompt', 'Sistema', 'General'];
-  
+
   const IMPACTO_ICON = { alto: '💪', medio: '⚡', bajo: '🌱' };
   const IMPACTO_LABEL = { alto: 'Alto', medio: 'Medio', bajo: 'Bajo' };
 
@@ -2736,6 +2736,7 @@
     btn.textContent = 'Generando…';
     $('ia-groups-existentes').innerHTML = '<p class="empty-note">Generando<span class="loading-dots"></span></p>';
     $('ia-groups-originales').innerHTML = '<p class="empty-note">Generando<span class="loading-dots"></span></p>';
+    $('ia-groups-productividad').innerHTML = '<p class="empty-note">Generando<span class="loading-dots"></span></p>';
     $('ia-meta').textContent = 'Generando…';
     try {
       const result = await callAIJson({ prompt: IA_PROMPT, jsonMode: true, maxTokens: 2400, temperature: 0.9 });
@@ -2767,8 +2768,10 @@
       saveIa();
       renderAllIdeas();
     } catch(e){
-      $('ia-groups-existentes').innerHTML = '<p class="empty-note">⚠️ ' + escapeHtml(e.message) + '</p>';
+      const errMsg = '<p class="empty-note">⚠️ ' + escapeHtml(e.message) + '</p>';
+      $('ia-groups-existentes').innerHTML = errMsg;
       $('ia-groups-originales').innerHTML = '';
+      $('ia-groups-productividad').innerHTML = '';
       $('ia-meta').textContent = 'Error';
     } finally {
       iaBusy = false;
