@@ -63,7 +63,7 @@ export async function onRequestPost({ request, env }) {
       }))
     ];
   } else if (typeof prompt === 'string' && prompt.trim()) {
-    if (prompt.length > 12000) {
+    if (prompt.length > 20000) {
       return json({ error: 'Prompt demasiado largo', code: 'too_long' }, 400, origin);
     }
     groqMessages = [
@@ -76,7 +76,7 @@ export async function onRequestPost({ request, env }) {
 
   const baseParams = {
     messages: groqMessages,
-    max_tokens: Math.min(Math.max(256, maxTokens), 4096),
+    max_tokens: Math.min(Math.max(256, maxTokens), 16000),
     temperature: Math.min(Math.max(0, temperature), 2)
   };
 
@@ -93,6 +93,27 @@ export async function onRequestPost({ request, env }) {
     // Si el modelo no existe, probamos el siguiente
     if (resultado.reason === 'no_model') {
       ultimoError = resultado.message;
+      continue;
+    }
+
+    // Si Groq falla porque el modelo generó JSON inválido (comentarios, texto extra, etc),
+    // reintentamos SIN json_mode y extraemos el JSON manualmente
+    if (resultado.reason === 'json_invalid' && jsonMode) {
+      const payloadSinJson = { model: modelo, ...baseParams };
+      const retry = await intentarGroq(payloadSinJson, env.GROQ_API_KEY);
+      if (retry.ok) {
+        const cleaned = retry.text
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/```\s*$/i, '')
+          .trim();
+        const firstBrace = cleaned.indexOf('{');
+        const lastBrace = cleaned.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace > firstBrace) {
+          return json({ text: cleaned.slice(firstBrace, lastBrace + 1) }, 200, origin);
+        }
+        return json({ text: cleaned }, 200, origin);
+      }
+      ultimoError = retry.message;
       continue;
     }
 
@@ -157,3 +178,7 @@ async function intentarGroq(payload, apiKey) {
 
   return { ok: false, status: res.status, reason: 'other', message: errMsg };
 }
+
+  if (errMsg.includes('validate JSON') || errMsg.includes('failed_generation') || errMsg.includes('json_validate_failed') || errMsg.includes('Failed to validate')) {
+    return { ok: false, status: res.status, reason: 'json_invalid', message: errMsg };
+  }
