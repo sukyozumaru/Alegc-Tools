@@ -1644,6 +1644,9 @@
       <section class="seg-panel active" id="iapanel-existentes">
         <div id="ia-groups-existentes"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
       </section>
+      <section class="seg-panel" id="iapanel-originales">
+        <div id="ia-groups-originales"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
+      </section>
       <section class="seg-panel" id="iapanel-productividad">
         <div id="ia-groups-productividad"><p class="empty-note">Generando ideas<span class="loading-dots"></span></p></div>
       </section>
@@ -2629,10 +2632,14 @@
     '</div>';
   }
 
-  function renderIdeaGroup(containerId, list){
+    function renderIdeaGroup(containerId, list){
     const wrap = $(containerId);
-    if (!list.length){
-      wrap.innerHTML = '<p class="empty-note">No hay ideas activas. Genera nuevas.</p>';
+    if (!wrap) {
+      console.warn('⚠️ Panel no encontrado:', containerId);
+      return;
+    }
+    if (!list.length) {
+      wrap.innerHTML = '<p class="empty-note">No hay ideas activas en esta sección.</p>';
       return;
     }
     const groups = {};
